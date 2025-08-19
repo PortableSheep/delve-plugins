@@ -1,0 +1,41 @@
+github-dashboard:
+  name: "GitHub Dashboard"
+  description: "Monitor GitHub repositories and pull requests with real-time updates"
+  author: "Michael Gunderson"
+  license: "MIT"
+  repository: "https://github.com/PortableSheep/delve-plugins"
+  homepage: "https://github.com/PortableSheep/delve-plugins/tree/main/github-dashboard"
+  tags: ["github", "dashboard", "monitoring", "git", "repositories"]
+  category: "development-tools"
+  min_delve_version: "v0.1.0"
+  versions:
+    - version: "v1.0.0"
+      released: "2025-08-19T02:58:22Z"
+      compatibility: ["v0.1.0", "v0.2.0"]
+      assets:
+        darwin-amd64:
+          url: "github-dashboard/releases/v1.0.0/github-dashboard-darwin-amd64.tar.gz"
+          checksum: "sha256:390ca2a3ece6685013687d5b98a5088f583d397bcb42cdb7eaf05dc272ffedb5"
+          size: 2601874
+        darwin-arm64:
+          url: "github-dashboard/releases/v1.0.0/github-dashboard-darwin-arm64.tar.gz"
+          checksum: "sha256:35285a05e9fa84c38028fda4cd51070bf483c954b3c4af58b908a49dbf03973d"
+          size: 2424205
+        linux-amd64:
+          url: "github-dashboard/releases/v1.0.0/github-dashboard-linux-amd64.tar.gz"
+          checksum: "sha256:aaced8bcffe331700c09200190a3ac8c35886ad93e84bf363f4bc525fe95d011"
+          size: 2563600
+        linux-arm64:
+          url: "github-dashboard/releases/v1.0.0/github-dashboard-linux-arm64.tar.gz"
+          checksum: "sha256:336e845d5d97f2f050106134f5856eaa21f6b40b2378132a8d0b7e543f7e475f"
+          size: 2337589
+        windows-amd64:
+          url: "github-dashboard/releases/v1.0.0/github-dashboard-windows-amd64.zip"
+          checksum: "sha256:0d7283aa5a0f767bde67f2d2d225d40f3d4231adb1267d56711336a09c63144a"
+          size: 2615317
+      frontend:
+        entry: "component.js"
+        checksum: "sha256:b3c4ff24e5ab6067cab9ce13c2e01b0021c69bf075af6f535ae9129bf6d7bdc5"
+      plugin_metadata:
+        url: "github-dashboard/plugin.json"
+        checksum: "sha256:270bdece2a4956e5f00b9a4007c6a8df7a2ce26cc7af243edc96184b4fbafb36"
