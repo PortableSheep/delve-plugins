@@ -1,24 +1,24 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Configuration
 const config = {
-    input: join(__dirname, 'src', 'component.vue'),
-    output: join(__dirname, 'component.js'),
-    distDir: join(__dirname, 'dist'),
-    vueVersion: '3.4.0'
+  input: join(__dirname, "src", "component.vue"),
+  output: join(__dirname, "component.js"),
+  distDir: join(__dirname, "dist"),
+  vueVersion: "3.4.0",
 };
 
 // Vue CDN URL
 const VUE_CDN = `https://unpkg.com/vue@${config.vueVersion}/dist/vue.global.js`;
 
-console.log('🔨 Building GitHub Dashboard Web Component...');
+console.log("🔨 Building GitHub Dashboard Web Component...");
 
 // Create the component file
 const componentCode = `
@@ -961,7 +961,7 @@ const componentCode = `
 
 // Ensure dist directory exists
 if (!existsSync(config.distDir)) {
-    mkdirSync(config.distDir, { recursive: true });
+  mkdirSync(config.distDir, { recursive: true });
 }
 
 // Write the component file
@@ -969,4 +969,4 @@ writeFileSync(config.output, componentCode.trim());
 
 console.log(`✅ Component built successfully: ${config.output}`);
 console.log(`📦 Size: ${Math.round(componentCode.length / 1024)}KB`);
-console.log('🚀 Ready to use in your Delve plugin!');
+console.log("🚀 Ready to use in your Delve plugin!");

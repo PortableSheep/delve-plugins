@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	sdk "github.com/PortableSheep/delve_sdk"
+	sdk "github.com/PortableSheep/delve-sdk"
 )
 
 // Repository represents a GitHub repository

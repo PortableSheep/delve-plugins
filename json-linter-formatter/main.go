@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	sdk "github.com/PortableSheep/delve_sdk"
+	sdk "github.com/PortableSheep/delve-sdk"
 )
 
 // JSONValidationResult represents the result of JSON validation and formatting

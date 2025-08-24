@@ -9,7 +9,13 @@
     "homepage": "https://github.com/PortableSheep/delve-plugins/tree/main/github-dashboard",
     "repository": "https://github.com/PortableSheep/delve-plugins",
     "icon": "🐙",
-    "tags": ["github", "dashboard", "monitoring", "git", "repositories"],
+    "tags": [
+      "github",
+      "dashboard",
+      "monitoring",
+      "git",
+      "repositories"
+    ],
     "category": "development-tools",
     "min_delve_version": "v0.1.0"
   },
@@ -65,8 +71,8 @@
     }
   ],
   "build_info": {
-    "built_at": "2025-08-19T02:58:22Z",
+    "built_at": "2025-08-23T02:34:51Z",
     "go_version": "go1.24.2",
-    "commit": "eb20eb3ff4e55b86e3d06aebb820264cf7089f86"
+    "commit": "b5eff3a44d4923373122d613aa58a47d38c8e8bf"
   }
 }

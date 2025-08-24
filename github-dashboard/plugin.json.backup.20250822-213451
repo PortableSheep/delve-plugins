@@ -1,0 +1,69 @@
+{
+  "info": {
+    "id": "github-dashboard",
+    "name": "GitHub Dashboard",
+    "version": "v1.0.0",
+    "description": "Monitor GitHub repositories and pull requests with real-time updates",
+    "author": "Michael Gunderson",
+    "license": "MIT",
+    "homepage": "https://github.com/PortableSheep/delve-plugins/tree/main/github-dashboard",
+    "repository": "https://github.com/PortableSheep/delve-plugins",
+    "icon": "🐙",
+    "tags": ["github", "dashboard", "monitoring", "git", "repositories"],
+    "category": "development-tools",
+    "min_delve_version": "v0.1.0"
+  },
+  "runtime": {
+    "executable": "github-dashboard",
+    "frontend_entry": "component.js",
+    "permissions": ["network.http", "storage.local"]
+  },
+  "config_schema": {
+    "github_token": {
+      "type": "string",
+      "required": true,
+      "description": "GitHub Personal Access Token",
+      "sensitive": true
+    },
+    "repositories": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+$"
+      },
+      "description": "List of repositories to monitor (owner/repo format)",
+      "default": []
+    },
+    "refresh_interval": {
+      "type": "integer",
+      "minimum": 30,
+      "maximum": 3600,
+      "default": 300,
+      "description": "Data refresh interval in seconds"
+    },
+    "compact_view": {
+      "type": "boolean",
+      "default": false,
+      "description": "Use compact view for repository list"
+    }
+  },
+  "health_checks": [
+    {
+      "name": "github_api_connectivity",
+      "interval": "60s",
+      "timeout": "10s",
+      "description": "Check GitHub API connectivity"
+    },
+    {
+      "name": "token_validity",
+      "interval": "300s",
+      "timeout": "5s",
+      "description": "Validate GitHub token"
+    }
+  ],
+  "build_info": {
+    "built_at": "2025-08-19T02:58:22Z",
+    "go_version": "go1.24.2",
+    "commit": "eb20eb3ff4e55b86e3d06aebb820264cf7089f86"
+  }
+}
