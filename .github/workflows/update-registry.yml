@@ -9,75 +9,30 @@ on:
   workflow_dispatch:
 
 jobs:
-  update-registry:
+  trigger-registry-update:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout plugins repository
         uses: actions/checkout@v4
-        with:
-          path: plugins
 
-      - name: Checkout registry repository
-        uses: actions/checkout@v4
+      - name: Trigger registry repository workflow
+        uses: peter-evans/repository-dispatch@v2
         with:
+          token: ${{ secrets.REGISTRY_DISPATCH_TOKEN }}
           repository: PortableSheep/delve-registry
-          token: ${{ secrets.REGISTRY_TOKEN }}
-          path: registry
+          event-type: plugins-updated
+          client-payload: |
+            {
+              "plugins_repo": "${{ github.repository }}",
+              "ref": "${{ github.ref }}",
+              "sha": "${{ github.sha }}",
+              "changed_files": "${{ steps.changes.outputs.files }}"
+            }
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
+      - name: Log dispatch
         run: |
-          pip install PyYAML
-
-      - name: Generate registry files
-        run: |
-          cd plugins
-          python .github/scripts/simple-registry-generator.py
-
-      - name: Copy generated files to registry
-        run: |
-          cp plugins/registry.yml registry/
-          cp -r plugins/api registry/
-
-          # Copy plugin.json files to registry
-          for plugin in plugins/*/; do
-            plugin_name=$(basename "$plugin")
-            if [ -f "$plugin/plugin.json" ]; then
-              mkdir -p "registry/$plugin_name"
-              cp "$plugin/plugin.json" "registry/$plugin_name/"
-            fi
-          done
-
-          # Copy or link release assets
-          for plugin in plugins/*/; do
-            plugin_name=$(basename "$plugin")
-            if [ -d "$plugin/releases" ]; then
-              mkdir -p "registry/$plugin_name"
-              cp -r "$plugin/releases" "registry/$plugin_name/"
-            fi
-          done
-
-      - name: Commit and push registry updates
-        run: |
-          cd registry
-          git config user.name "Plugin Registry Bot"
-          git config user.email "bot@delve-registry.local"
-
-          git add .
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Auto-update registry from plugins@$(cd ../plugins && git rev-parse --short HEAD)"
-            git push
-          fi
-
-      - name: Create deployment
-        if: success()
-        run: |
-          echo "Registry updated successfully"
-          echo "View at: https://raw.githubusercontent.com/PortableSheep/delve-registry/main/registry.yml"
+          echo "✅ Registry update triggered"
+          echo "Repository: PortableSheep/delve-registry"
+          echo "Event: plugins-updated"
+          echo "Triggered by: ${{ github.sha }}"
