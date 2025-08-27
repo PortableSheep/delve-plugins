@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Dashboard Plugin Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            background-color: #f6f8fa;
+            color: #24292f;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .test-header {
+            background: #24292f;
+            color: white;
+            padding: 16px 20px;
+            border-bottom: 1px solid #d1d5da;
+        }
+
+        .test-header h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .test-header p {
+            margin: 8px 0 0 0;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .test-content {
+            padding: 0;
+            min-height: 600px;
+        }
+
+        .test-info {
+            padding: 20px;
+            background: #fff8e5;
+            border-bottom: 1px solid #f1c40f;
+            color: #8b6914;
+        }
+
+        .test-info strong {
+            color: #6c5ce7;
+        }
+
+        /* Make sure the component fills the container */
+        github-dashboard {
+            display: block;
+            width: 100%;
+            min-height: 500px;
+        }
+
+        .loading-fallback {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: #586069;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0366d6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .debug-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            max-width: 300px;
+            z-index: 1000;
+        }
+
+        .debug-info h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+        }
+
+        .debug-info ul {
+            margin: 0;
+            padding-left: 16px;
+        }
+
+        .debug-info li {
+            margin: 4px 0;
+        }
+
+        .status-ok { color: #28a745; }
+        .status-error { color: #dc3545; }
+        .status-warning { color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🐙 GitHub Dashboard Plugin Test</h1>
+            <p>Testing the Vue 3 web component in standalone mode</p>
+        </div>
+
+        <div class="test-info">
+            <strong>Test Configuration:</strong> Running in demo mode without GitHub token.
+            The component should load and display sample repository data and pull requests.
+            <br><br>
+            <strong>Expected Behavior:</strong>
+            <ul>
+                <li>✅ Component loads Vue 3 from CDN</li>
+                <li>✅ Web component registers as &lt;github-dashboard&gt;</li>
+                <li>✅ Displays demo repositories and pull requests</li>
+                <li>✅ Responsive design works on different screen sizes</li>
+                <li>✅ Clicking repository cards shows pull requests</li>
+                <li>✅ External links open GitHub pages</li>
+            </ul>
+        </div>
+
+        <div class="test-content">
+            <!-- GitHub Dashboard Web Component -->
+            <github-dashboard
+                refresh-interval="60"
+                compact-view="false">
+
+                <!-- Fallback content while component loads -->
+                <div class="loading-fallback">
+                    <div class="loading-spinner"></div>
+                    <p>Loading GitHub Dashboard Component...</p>
+                    <small>If this message persists, check the browser console for errors</small>
+                </div>
+
+            </github-dashboard>
+        </div>
+    </div>
+
+    <!-- Debug Information -->
+    <div class="debug-info">
+        <h4>🔍 Debug Info</h4>
+        <ul id="debug-list">
+            <li id="vue-status" class="status-warning">Vue: Loading...</li>
+            <li id="component-status" class="status-warning">Component: Loading...</li>
+            <li id="element-status" class="status-warning">Custom Element: Not registered</li>
+        </ul>
+    </div>
+
+    <!-- Load the GitHub Dashboard Component -->
+    <script src="component.js"></script>
+
+    <!-- Test Script -->
+    <script>
+        console.log('🧪 GitHub Dashboard Test Started');
+
+        const debugList = document.getElementById('debug-list');
+        const vueStatus = document.getElementById('vue-status');
+        const componentStatus = document.getElementById('component-status');
+        const elementStatus = document.getElementById('element-status');
+
+        // Check Vue availability
+        function checkVue() {
+            if (typeof Vue !== 'undefined') {
+                vueStatus.textContent = 'Vue: ✅ Loaded (v' + Vue.version + ')';
+                vueStatus.className = 'status-ok';
+                console.log('✅ Vue loaded:', Vue.version);
+                return true;
+            } else {
+                vueStatus.textContent = 'Vue: ❌ Not loaded';
+                vueStatus.className = 'status-error';
+                console.log('❌ Vue not loaded');
+                return false;
+            }
+        }
+
+        // Check if custom element is registered
+        function checkCustomElement() {
+            if (customElements.get('github-dashboard')) {
+                elementStatus.textContent = 'Custom Element: ✅ Registered';
+                elementStatus.className = 'status-ok';
+                console.log('✅ Custom element registered');
+                return true;
+            } else {
+                elementStatus.textContent = 'Custom Element: ❌ Not registered';
+                elementStatus.className = 'status-error';
+                console.log('❌ Custom element not registered');
+                return false;
+            }
+        }
+
+        // Check component status
+        function checkComponent() {
+            const element = document.querySelector('github-dashboard');
+            if (element && element.shadowRoot) {
+                componentStatus.textContent = 'Component: ✅ Initialized with Shadow DOM';
+                componentStatus.className = 'status-ok';
+                console.log('✅ Component initialized with Shadow DOM');
+                return true;
+            } else if (element) {
+                componentStatus.textContent = 'Component: ⚠️ Element exists but no Shadow DOM';
+                componentStatus.className = 'status-warning';
+                console.log('⚠️ Element exists but no Shadow DOM');
+                return false;
+            } else {
+                componentStatus.textContent = 'Component: ❌ Element not found';
+                componentStatus.className = 'status-error';
+                console.log('❌ Component element not found');
+                return false;
+            }
+        }
+
+        // Test plugin API availability
+        function setupMockAPI() {
+            if (!window.pluginAPI) {
+                console.log('🔧 Setting up mock plugin API for testing');
+                window.pluginAPI = {
+                    getRepositories: async () => {
+                        console.log('📡 Mock API: getRepositories called');
+                        return [
+                            {
+                                id: 1,
+                                name: 'delve',
+                                full_name: 'PortableSheep/delve',
+                                description: 'Advanced plugin system for Go applications - Test Data',
+                                stargazers_count: 1250,
+                                forks_count: 180,
+                                open_issues_count: 23,
+                                language: 'Go',
+                                updated_at: new Date(Date.now() - 3600000).toISOString(),
+                                html_url: 'https://github.com/PortableSheep/delve',
+                                private: false,
+                                fork: false,
+                            },
+                            {
+                                id: 2,
+                                name: 'delve-plugins',
+                                full_name: 'PortableSheep/delve-plugins',
+                                description: 'Official plugin collection for Delve',
+                                stargazers_count: 89,
+                                forks_count: 34,
+                                open_issues_count: 8,
+                                language: 'Go',
+                                updated_at: new Date(Date.now() - 1800000).toISOString(),
+                                html_url: 'https://github.com/PortableSheep/delve-plugins',
+                                private: false,
+                                fork: false,
+                            }
+                        ];
+                    },
+                    getPullRequests: async (repoName) => {
+                        console.log(`📡 Mock API: getPullRequests called for ${repoName}`);
+                        return [
+                            {
+                                id: 42,
+                                number: 42,
+                                title: 'Add enhanced GitHub dashboard features',
+                                state: 'open',
+                                created_at: new Date(Date.now() - 86400000).toISOString(),
+                                updated_at: new Date(Date.now() - 3600000).toISOString(),
+                                html_url: `https://github.com/${repoName}/pull/42`,
+                                draft: false,
+                                user: {
+                                    login: 'developer',
+                                    avatar_url: 'https://github.com/identicons/developer.png',
+                                }
+                            },
+                            {
+                                id: 38,
+                                number: 38,
+                                title: 'Fix responsive design issues',
+                                state: 'open',
+                                created_at: new Date(Date.now() - 172800000).toISOString(),
+                                updated_at: new Date(Date.now() - 7200000).toISOString(),
+                                html_url: `https://github.com/${repoName}/pull/38`,
+                                draft: true,
+                                user: {
+                                    login: 'designer',
+                                    avatar_url: 'https://github.com/identicons/designer.png',
+                                }
+                            }
+                        ];
+                    }
+                };
+                console.log('✅ Mock plugin API ready');
+            }
+        }
+
+        // Initialize test environment
+        function initTest() {
+            setupMockAPI();
+
+            // Initial checks
+            checkVue();
+            checkCustomElement();
+            checkComponent();
+
+            // Periodic checks to monitor loading progress
+            const checkInterval = setInterval(() => {
+                const vueOk = checkVue();
+                const elementOk = checkCustomElement();
+                const componentOk = checkComponent();
+
+                if (vueOk && elementOk && componentOk) {
+                    console.log('🎉 All tests passed! Component is ready.');
+                    clearInterval(checkInterval);
+                }
+            }, 1000);
+
+            // Stop checking after 30 seconds
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                console.log('⏰ Test timeout reached');
+            }, 30000);
+        }
+
+        // Start tests when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initTest);
+        } else {
+            initTest();
+        }
+
+        // Monitor for errors
+        window.addEventListener('error', (event) => {
+            console.error('❌ Test Error:', event.error);
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('❌ Unhandled Promise Rejection:', event.reason);
+        });
+
+        console.log('🚀 Test environment initialized');
+    </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "buildTime": "2025-08-27T01:30:51.739Z",
+  "vueVersion": "3.4.21",
+  "outputSize": 157,
+  "features": [
+    "Vue 3 Web Component",
+    "Shadow DOM encapsulation",
+    "GitHub API integration",
+    "Responsive design",
+    "Error handling",
+    "Mock data fallback",
+    "CDN fallback loading"
+  ]
+}

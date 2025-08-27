@@ -1,0 +1,171 @@
+{
+  "info": {
+    "id": "github-dashboard",
+    "name": "GitHub Dashboard",
+    "version": "v1.0.2",
+    "description": "A comprehensive GitHub dashboard for monitoring repositories, pull requests, and issues with real-time updates, beautiful UI, and intelligent caching",
+    "author": "Michael Gunderson",
+    "license": "MIT",
+    "homepage": "https://github.com/PortableSheep/delve-plugins/tree/main/github-dashboard",
+    "repository": "https://github.com/PortableSheep/delve-plugins",
+    "documentation": "https://github.com/PortableSheep/delve-plugins/tree/main/github-dashboard/README.md",
+    "icon": "🐙",
+    "screenshots": [
+      "https://raw.githubusercontent.com/PortableSheep/delve-plugins/main/github-dashboard/screenshots/dashboard-overview.png",
+      "https://raw.githubusercontent.com/PortableSheep/delve-plugins/main/github-dashboard/screenshots/repository-cards.png",
+      "https://raw.githubusercontent.com/PortableSheep/delve-plugins/main/github-dashboard/screenshots/pull-requests.png"
+    ],
+    "tags": [
+      "github",
+      "dashboard",
+      "monitoring",
+      "git",
+      "repositories",
+      "pull-requests",
+      "development",
+      "productivity",
+      "ui",
+      "responsive"
+    ],
+    "category": "development-tools",
+    "min_delve_version": "v0.1.0",
+    "supported_platforms": ["darwin", "linux", "windows"],
+    "supported_architectures": ["amd64", "arm64"]
+  },
+  "runtime": {
+    "executable": "github-dashboard",
+    "frontend_entry": "frontend/component.js",
+    "frontend_fallback": "frontend/component.min.js",
+    "permissions": [
+      "network.http",
+      "network.https",
+      "storage.local",
+      "storage.config"
+    ],
+    "resource_limits": {
+      "max_memory": "128MB",
+      "max_cpu_percent": 10,
+      "max_network_requests_per_minute": 5000
+    }
+  },
+  "config_schema": {
+    "github_token": {
+      "type": "string",
+      "required": false,
+      "description": "GitHub Personal Access Token (optional - without it, you'll see demo data with rate limits)",
+      "sensitive": true,
+      "placeholder": "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    "repositories": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+$"
+      },
+      "description": "List of repositories to monitor (format: owner/repo-name)",
+      "default": [],
+      "examples": ["PortableSheep/delve", "golang/go", "microsoft/vscode"]
+    },
+    "refresh_interval": {
+      "type": "integer",
+      "minimum": 30,
+      "maximum": 3600,
+      "default": 300,
+      "description": "Background data refresh interval in seconds",
+      "ui_hint": "slider"
+    },
+    "compact_view": {
+      "type": "boolean",
+      "default": false,
+      "description": "Use compact layout for repository cards"
+    },
+    "show_private_repos": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include private repositories (requires GitHub token with appropriate permissions)"
+    },
+    "max_repos_per_page": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 100,
+      "default": 50,
+      "description": "Maximum number of repositories to display"
+    },
+    "max_prs_per_repo": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 50,
+      "default": 20,
+      "description": "Maximum number of pull requests to show per repository"
+    },
+    "cache_timeout": {
+      "type": "integer",
+      "minimum": 60,
+      "maximum": 1800,
+      "default": 300,
+      "description": "Data cache timeout in seconds (reduces API calls)"
+    }
+  },
+  "health_checks": [
+    {
+      "name": "github_api_connectivity",
+      "interval": "60s",
+      "timeout": "10s",
+      "description": "Check GitHub API connectivity and rate limits",
+      "critical": false
+    },
+    {
+      "name": "token_validity",
+      "interval": "300s",
+      "timeout": "5s",
+      "description": "Validate GitHub token permissions and scope",
+      "critical": false
+    },
+    {
+      "name": "plugin_health",
+      "interval": "30s",
+      "timeout": "5s",
+      "description": "Overall plugin health and resource usage",
+      "critical": true
+    }
+  ],
+  "build_info": {
+    "built_at": "2025-08-26T02:15:00Z",
+    "go_version": "go1.24.2",
+    "vue_version": "3.4.21",
+    "vite_version": "5.4.19",
+    "commit": "enhanced-ui-distribution-ready",
+    "build_type": "release",
+    "features": [
+      "github-primer-ui",
+      "responsive-design",
+      "intelligent-caching",
+      "error-recovery",
+      "accessibility",
+      "demo-mode"
+    ]
+  },
+  "changelog": {
+    "v1.0.1": {
+      "date": "2025-08-26",
+      "changes": [
+        "Complete UI redesign with GitHub Primer design system",
+        "Improved responsive design and accessibility",
+        "Added intelligent caching and error recovery",
+        "Better loading states and visual hierarchy",
+        "Enhanced plugin distribution compatibility",
+        "Added demo mode for users without GitHub tokens",
+        "Improved configuration options and validation"
+      ]
+    },
+    "v1.0.0": {
+      "date": "2025-08-23",
+      "changes": [
+        "Initial release",
+        "Basic GitHub repository and PR monitoring",
+        "WebSocket communication with host",
+        "Configuration management"
+      ]
+    }
+  }
+}

@@ -1,935 +1,292 @@
-(function () {
-    'use strict';
+/*!
+ * GitHub Dashboard Web Component v1.0.0
+ * Delve Plugin for monitoring GitHub repositories and pull requests
+ *
+ * Built: 2025-08-27T01:30:51.105Z
+ * Vue Version: 3.4.21
+ *
+ * Copyright (c) 2024 Michael Gunderson
+ * Licensed under MIT License
+ */
 
-    // Load Vue from CDN if not available
-    if (typeof Vue === 'undefined') {
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/vue@3.4.0/dist/vue.global.js';
-        script.onload = initializeComponent;
-        document.head.appendChild(script);
-    } else {
-        initializeComponent();
+(function (global) {
+  'use strict';
+
+  // Component state management
+  let isVueLoaded = false;
+  let isComponentRegistered = false;
+  let pendingInitializations = [];
+
+  // Error handling
+  function handleError(error, context) {
+    console.error(`[GitHub Dashboard] Error in ${context}:`, error);
+
+    // Create error display element
+    const errorElement = document.createElement('div');
+    errorElement.innerHTML = `
+      <div style="
+        padding: 20px;
+        background: #fff8f8;
+        border: 1px solid #ffcdd2;
+        border-radius: 6px;
+        color: #d1242f;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 10px 0;
+      ">
+        <div style="font-weight: 600; margin-bottom: 8px;">
+          ⚠️ GitHub Dashboard Error
+        </div>
+        <div style="font-size: 14px; margin-bottom: 8px;">
+          Failed to initialize component: ${context}
+        </div>
+        <div style="font-size: 12px; color: #636c76;">
+          ${error.message || 'Unknown error occurred'}
+        </div>
+      </div>
+    `;
+    return errorElement;
+  }
+
+  // Vue loader with fallback
+  function loadVue() {
+    return new Promise((resolve, reject) => {
+      // Check if Vue is already available
+      if (typeof global.Vue !== 'undefined') {
+        isVueLoaded = true;
+        console.log('[GitHub Dashboard] Vue already available');
+        resolve(global.Vue);
+        return;
+      }
+
+      // Load Vue from CDN
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/vue@3.4.21/dist/vue.global.js';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+
+      script.onload = () => {
+        if (typeof global.Vue !== 'undefined') {
+          isVueLoaded = true;
+          console.log('[GitHub Dashboard] Vue loaded from CDN');
+          resolve(global.Vue);
+        } else {
+          reject(new Error('Vue failed to load properly'));
+        }
+      };
+
+      script.onerror = (error) => {
+        console.error('[GitHub Dashboard] Failed to load Vue from CDN:', error);
+        reject(new Error('Failed to load Vue from CDN'));
+      };
+
+      // Timeout fallback
+      setTimeout(() => {
+        if (!isVueLoaded) {
+          reject(new Error('Vue loading timeout'));
+        }
+      }, 10000); // 10 second timeout
+
+      document.head.appendChild(script);
+    });
+  }
+
+  // Component registration
+  function registerComponent() {
+    try {
+      if (isComponentRegistered) {
+        console.log('[GitHub Dashboard] Component already registered');
+        return Promise.resolve();
+      }
+
+      // Built component code
+      var GitHubDashboard=function(e){"use strict";var t=Object.defineProperty,n=Object.getOwnPropertySymbols,o=Object.prototype.hasOwnProperty,r=Object.prototype.propertyIsEnumerable,__defNormalProp=(e,n,o)=>n in e?t(e,n,{enumerable:!0,configurable:!0,writable:!0,value:o}):e[n]=o,__async=(e,t,n)=>new Promise((o,r)=>{var fulfilled=e=>{try{step(n.next(e))}catch(t){r(t)}},rejected=e=>{try{step(n.throw(e))}catch(t){r(t)}},step=e=>e.done?o(e.value):Promise.resolve(e.value).then(fulfilled,rejected);step((n=n.apply(e,t)).next())});
+/**
+  * @vue/shared v3.5.18
+  * (c) 2018-present Yuxi (Evan) You and Vue contributors
+  * @license MIT
+  **/
+/*! #__NO_SIDE_EFFECTS__ */
+function makeMap(e){const t=Object.create(null);for(const n of e.split(","))t[n]=1;return e=>e in t}const a="production"!==process.env.NODE_ENV?Object.freeze({}):{},s="production"!==process.env.NODE_ENV?Object.freeze([]):[],NOOP=()=>{},NO=()=>!1,isOn=e=>111===e.charCodeAt(0)&&110===e.charCodeAt(1)&&(e.charCodeAt(2)>122||e.charCodeAt(2)<97),isModelListener=e=>e.startsWith("onUpdate:"),i=Object.assign,remove=(e,t)=>{const n=e.indexOf(t);n>-1&&e.splice(n,1)},c=Object.prototype.hasOwnProperty,hasOwn=(e,t)=>c.call(e,t),l=Array.isArray,isMap=e=>"[object Map]"===toTypeString(e),isSet=e=>"[object Set]"===toTypeString(e),isFunction=e=>"function"==typeof e,isString=e=>"string"==typeof e,isSymbol=e=>"symbol"==typeof e,isObject=e=>null!==e&&"object"==typeof e,isPromise=e=>(isObject(e)||isFunction(e))&&isFunction(e.then)&&isFunction(e.catch),d=Object.prototype.toString,toTypeString=e=>d.call(e),toRawType=e=>toTypeString(e).slice(8,-1),isPlainObject=e=>"[object Object]"===toTypeString(e),isIntegerKey=e=>isString(e)&&"NaN"!==e&&"-"!==e[0]&&""+parseInt(e,10)===e,p=makeMap(",key,ref,ref_for,ref_key,onVnodeBeforeMount,onVnodeMounted,onVnodeBeforeUpdate,onVnodeUpdated,onVnodeBeforeUnmount,onVnodeUnmounted"),u=makeMap("bind,cloak,else-if,else,for,html,if,model,on,once,pre,show,slot,text,memo"),cacheStringFunction=e=>{const t=Object.create(null);return n=>t[n]||(t[n]=e(n))},f=/-(\w)/g,v=cacheStringFunction(e=>e.replace(f,(e,t)=>t?t.toUpperCase():"")),h=/\B([A-Z])/g,m=cacheStringFunction(e=>e.replace(h,"-$1").toLowerCase()),g=cacheStringFunction(e=>e.charAt(0).toUpperCase()+e.slice(1)),b=cacheStringFunction(e=>e?`on${g(e)}`:""),hasChanged=(e,t)=>!Object.is(e,t),invokeArrayFns=(e,...t)=>{for(let n=0;n<e.length;n++)e[n](...t)},def=(e,t,n,o=!1)=>{Object.defineProperty(e,t,{configurable:!0,enumerable:!1,writable:o,value:n})},looseToNumber=e=>{const t=parseFloat(e);return isNaN(t)?e:t};let y;const getGlobalThis=()=>y||(y="undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:"undefined"!=typeof window?window:"undefined"!=typeof global?global:{});function normalizeStyle(e){if(l(e)){const t={};for(let n=0;n<e.length;n++){const o=e[n],r=isString(o)?parseStringStyle(o):normalizeStyle(o);if(r)for(const e in r)t[e]=r[e]}return t}if(isString(e)||isObject(e))return e}const _=/;(?![^(]*\))/g,N=/:([^]+)/,w=/\/\*[^]*?\*\//g;function parseStringStyle(e){const t={};return e.replace(w,"").split(_).forEach(e=>{if(e){const n=e.split(N);n.length>1&&(t[n[0].trim()]=n[1].trim())}}),t}function normalizeClass(e){let t="";if(isString(e))t=e;else if(l(e))for(let n=0;n<e.length;n++){const o=normalizeClass(e[n]);o&&(t+=o+" ")}else if(isObject(e))for(const n in e)e[n]&&(t+=n+" ");return t.trim()}const E=makeMap("html,body,base,head,link,meta,style,title,address,article,aside,footer,header,hgroup,h1,h2,h3,h4,h5,h6,nav,section,div,dd,dl,dt,figcaption,figure,picture,hr,img,li,main,ol,p,pre,ul,a,b,abbr,bdi,bdo,br,cite,code,data,dfn,em,i,kbd,mark,q,rp,rt,ruby,s,samp,small,span,strong,sub,sup,time,u,var,wbr,area,audio,map,track,video,embed,object,param,source,canvas,script,noscript,del,ins,caption,col,colgroup,table,thead,tbody,td,th,tr,button,datalist,fieldset,form,input,label,legend,meter,optgroup,option,output,progress,select,textarea,details,dialog,menu,summary,template,blockquote,iframe,tfoot"),k=makeMap("svg,animate,animateMotion,animateTransform,circle,clipPath,color-profile,defs,desc,discard,ellipse,feBlend,feColorMatrix,feComponentTransfer,feComposite,feConvolveMatrix,feDiffuseLighting,feDisplacementMap,feDistantLight,feDropShadow,feFlood,feFuncA,feFuncB,feFuncG,feFuncR,feGaussianBlur,feImage,feMerge,feMergeNode,feMorphology,feOffset,fePointLight,feSpecularLighting,feSpotLight,feTile,feTurbulence,filter,foreignObject,g,hatch,hatchpath,image,line,linearGradient,marker,mask,mesh,meshgradient,meshpatch,meshrow,metadata,mpath,path,pattern,polygon,polyline,radialGradient,rect,set,solidcolor,stop,switch,symbol,text,textPath,title,tspan,unknown,use,view"),x=makeMap("annotation,annotation-xml,maction,maligngroup,malignmark,math,menclose,merror,mfenced,mfrac,mfraction,mglyph,mi,mlabeledtr,mlongdiv,mmultiscripts,mn,mo,mover,mpadded,mphantom,mprescripts,mroot,mrow,ms,mscarries,mscarry,msgroup,msline,mspace,msqrt,msrow,mstack,mstyle,msub,msubsup,msup,mtable,mtd,mtext,mtr,munder,munderover,none,semantics"),V=makeMap("itemscope,allowfullscreen,formnovalidate,ismap,nomodule,novalidate,readonly");function includeBooleanAttr(e){return!!e||""===e}const isRef$1=e=>!(!e||!0!==e.__v_isRef),toDisplayString=e=>isString(e)?e:null==e?"":l(e)||isObject(e)&&(e.toString===d||!isFunction(e.toString))?isRef$1(e)?toDisplayString(e.value):JSON.stringify(e,replacer,2):String(e),replacer=(e,t)=>isRef$1(t)?replacer(e,t.value):isMap(t)?{[`Map(${t.size})`]:[...t.entries()].reduce((e,[t,n],o)=>(e[stringifySymbol(t,o)+" =>"]=n,e),{})}:isSet(t)?{[`Set(${t.size})`]:[...t.values()].map(e=>stringifySymbol(e))}:isSymbol(t)?stringifySymbol(t):!isObject(t)||l(t)||isPlainObject(t)?t:String(t),stringifySymbol=(e,t="")=>{var n;return isSymbol(e)?`Symbol(${null!=(n=e.description)?n:t})`:e};
+/**
+  * @vue/reactivity v3.5.18
+  * (c) 2018-present Yuxi (Evan) You and Vue contributors
+  * @license MIT
+  **/
+function warn$2(e,...t){console.warn(`[Vue warn] ${e}`,...t)}let O,D;class EffectScope{constructor(e=!1){this.detached=e,this._active=!0,this._on=0,this.effects=[],this.cleanups=[],this._isPaused=!1,this.parent=O,!e&&O&&(this.index=(O.scopes||(O.scopes=[])).push(this)-1)}get active(){return this._active}pause(){if(this._active){let e,t;if(this._isPaused=!0,this.scopes)for(e=0,t=this.scopes.length;e<t;e++)this.scopes[e].pause();for(e=0,t=this.effects.length;e<t;e++)this.effects[e].pause()}}resume(){if(this._active&&this._isPaused){let e,t;if(this._isPaused=!1,this.scopes)for(e=0,t=this.scopes.length;e<t;e++)this.scopes[e].resume();for(e=0,t=this.effects.length;e<t;e++)this.effects[e].resume()}}run(e){if(this._active){const t=O;try{return O=this,e()}finally{O=t}}else"production"!==process.env.NODE_ENV&&warn$2("cannot run an inactive effect scope.")}on(){1===++this._on&&(this.prevScope=O,O=this)}off(){this._on>0&&0===--this._on&&(O=this.prevScope,this.prevScope=void 0)}stop(e){if(this._active){let t,n;for(this._active=!1,t=0,n=this.effects.length;t<n;t++)this.effects[t].stop();for(this.effects.length=0,t=0,n=this.cleanups.length;t<n;t++)this.cleanups[t]();if(this.cleanups.length=0,this.scopes){for(t=0,n=this.scopes.length;t<n;t++)this.scopes[t].stop(!0);this.scopes.length=0}if(!this.detached&&this.parent&&!e){const e=this.parent.scopes.pop();e&&e!==this&&(this.parent.scopes[this.index]=e,e.index=this.index)}this.parent=void 0}}}const C=new WeakSet;class ReactiveEffect{constructor(e){this.fn=e,this.deps=void 0,this.depsTail=void 0,this.flags=5,this.next=void 0,this.cleanup=void 0,this.scheduler=void 0,O&&O.active&&O.effects.push(this)}pause(){this.flags|=64}resume(){64&this.flags&&(this.flags&=-65,C.has(this)&&(C.delete(this),this.trigger()))}notify(){2&this.flags&&!(32&this.flags)||8&this.flags||batch(this)}run(){if(!(1&this.flags))return this.fn();this.flags|=2,cleanupEffect(this),prepareDeps(this);const e=D,t=A;D=this,A=!0;try{return this.fn()}finally{"production"!==process.env.NODE_ENV&&D!==this&&warn$2("Active effect was not restored correctly - this is likely a Vue internal bug."),cleanupDeps(this),D=e,A=t,this.flags&=-3}}stop(){if(1&this.flags){for(let e=this.deps;e;e=e.nextDep)removeSub(e);this.deps=this.depsTail=void 0,cleanupEffect(this),this.onStop&&this.onStop(),this.flags&=-2}}trigger(){64&this.flags?C.add(this):this.scheduler?this.scheduler():this.runIfDirty()}runIfDirty(){isDirty(this)&&this.run()}get dirty(){return isDirty(this)}}let R,S,$=0;function batch(e,t=!1){if(e.flags|=8,t)return e.next=S,void(S=e);e.next=R,R=e}function startBatch(){$++}function endBatch(){if(--$>0)return;if(S){let e=S;for(S=void 0;e;){const t=e.next;e.next=void 0,e.flags&=-9,e=t}}let e;for(;R;){let n=R;for(R=void 0;n;){const o=n.next;if(n.next=void 0,n.flags&=-9,1&n.flags)try{n.trigger()}catch(t){e||(e=t)}n=o}}if(e)throw e}function prepareDeps(e){for(let t=e.deps;t;t=t.nextDep)t.version=-1,t.prevActiveLink=t.dep.activeLink,t.dep.activeLink=t}function cleanupDeps(e){let t,n=e.depsTail,o=n;for(;o;){const e=o.prevDep;-1===o.version?(o===n&&(n=e),removeSub(o),removeDep(o)):t=o,o.dep.activeLink=o.prevActiveLink,o.prevActiveLink=void 0,o=e}e.deps=t,e.depsTail=n}function isDirty(e){for(let t=e.deps;t;t=t.nextDep)if(t.dep.version!==t.version||t.dep.computed&&(refreshComputed(t.dep.computed)||t.dep.version!==t.version))return!0;return!!e._dirty}function refreshComputed(e){if(4&e.flags&&!(16&e.flags))return;if(e.flags&=-17,e.globalVersion===B)return;if(e.globalVersion=B,!e.isSSR&&128&e.flags&&(!e.deps&&!e._dirty||!isDirty(e)))return;e.flags|=2;const t=e.dep,n=D,o=A;D=e,A=!0;try{prepareDeps(e);const n=e.fn(e._value);(0===t.version||hasChanged(n,e._value))&&(e.flags|=128,e._value=n,t.version++)}catch(r){throw t.version++,r}finally{D=n,A=o,cleanupDeps(e),e.flags&=-3}}function removeSub(e,t=!1){const{dep:n,prevSub:o,nextSub:r}=e;if(o&&(o.nextSub=r,e.prevSub=void 0),r&&(r.prevSub=o,e.nextSub=void 0),"production"!==process.env.NODE_ENV&&n.subsHead===e&&(n.subsHead=r),n.subs===e&&(n.subs=o,!o&&n.computed)){n.computed.flags&=-5;for(let e=n.computed.deps;e;e=e.nextDep)removeSub(e,!0)}t||--n.sc||!n.map||n.map.delete(n.key)}function removeDep(e){const{prevDep:t,nextDep:n}=e;t&&(t.nextDep=n,e.prevDep=void 0),n&&(n.prevDep=t,e.nextDep=void 0)}let A=!0;const P=[];function pauseTracking(){P.push(A),A=!1}function resetTracking(){const e=P.pop();A=void 0===e||e}function cleanupEffect(e){const{cleanup:t}=e;if(e.cleanup=void 0,t){const e=D;D=void 0;try{t()}finally{D=e}}}let B=0;class Link{constructor(e,t){this.sub=e,this.dep=t,this.version=t.version,this.nextDep=this.prevDep=this.nextSub=this.prevSub=this.prevActiveLink=void 0}}class Dep{constructor(e){this.computed=e,this.version=0,this.activeLink=void 0,this.subs=void 0,this.map=void 0,this.key=void 0,this.sc=0,this.__v_skip=!0,"production"!==process.env.NODE_ENV&&(this.subsHead=void 0)}track(e){if(!D||!A||D===this.computed)return;let t=this.activeLink;if(void 0===t||t.sub!==D)t=this.activeLink=new Link(D,this),D.deps?(t.prevDep=D.depsTail,D.depsTail.nextDep=t,D.depsTail=t):D.deps=D.depsTail=t,addSub(t);else if(-1===t.version&&(t.version=this.version,t.nextDep)){const e=t.nextDep;e.prevDep=t.prevDep,t.prevDep&&(t.prevDep.nextDep=e),t.prevDep=D.depsTail,t.nextDep=void 0,D.depsTail.nextDep=t,D.depsTail=t,D.deps===t&&(D.deps=e)}return"production"!==process.env.NODE_ENV&&D.onTrack&&D.onTrack(i({effect:D},e)),t}trigger(e){this.version++,B++,this.notify(e)}notify(e){startBatch();try{if("production"!==process.env.NODE_ENV)for(let t=this.subsHead;t;t=t.nextSub)!t.sub.onTrigger||8&t.sub.flags||t.sub.onTrigger(i({effect:t.sub},e));for(let e=this.subs;e;e=e.prevSub)e.sub.notify()&&e.sub.dep.notify()}finally{endBatch()}}}function addSub(e){if(e.dep.sc++,4&e.sub.flags){const t=e.dep.computed;if(t&&!e.dep.subs){t.flags|=20;for(let e=t.deps;e;e=e.nextDep)addSub(e)}const n=e.dep.subs;n!==e&&(e.prevSub=n,n&&(n.nextSub=e)),"production"!==process.env.NODE_ENV&&void 0===e.dep.subsHead&&(e.dep.subsHead=e),e.dep.subs=e}}const M=new WeakMap,I=Symbol("production"!==process.env.NODE_ENV?"Object iterate":""),T=Symbol("production"!==process.env.NODE_ENV?"Map keys iterate":""),j=Symbol("production"!==process.env.NODE_ENV?"Array iterate":"");function track(e,t,n){if(A&&D){let o=M.get(e);o||M.set(e,o=new Map);let r=o.get(n);r||(o.set(n,r=new Dep),r.map=o,r.key=n),"production"!==process.env.NODE_ENV?r.track({target:e,type:t,key:n}):r.track()}}function trigger(e,t,n,o,r,a){const s=M.get(e);if(!s)return void B++;const run=s=>{s&&("production"!==process.env.NODE_ENV?s.trigger({target:e,type:t,key:n,newValue:o,oldValue:r,oldTarget:a}):s.trigger())};if(startBatch(),"clear"===t)s.forEach(run);else{const r=l(e),a=r&&isIntegerKey(n);if(r&&"length"===n){const e=Number(o);s.forEach((t,n)=>{("length"===n||n===j||!isSymbol(n)&&n>=e)&&run(t)})}else switch((void 0!==n||s.has(void 0))&&run(s.get(n)),a&&run(s.get(j)),t){case"add":r?a&&run(s.get("length")):(run(s.get(I)),isMap(e)&&run(s.get(T)));break;case"delete":r||(run(s.get(I)),isMap(e)&&run(s.get(T)));break;case"set":isMap(e)&&run(s.get(I))}}endBatch()}function reactiveReadArray(e){const t=toRaw(e);return t===e?t:(track(t,"iterate",j),isShallow(e)?t:t.map(toReactive))}function shallowReadArray(e){return track(e=toRaw(e),"iterate",j),e}const z={__proto__:null,[Symbol.iterator](){return iterator(this,Symbol.iterator,toReactive)},concat(...e){return reactiveReadArray(this).concat(...e.map(e=>l(e)?reactiveReadArray(e):e))},entries(){return iterator(this,"entries",e=>(e[1]=toReactive(e[1]),e))},every(e,t){return apply(this,"every",e,t,void 0,arguments)},filter(e,t){return apply(this,"filter",e,t,e=>e.map(toReactive),arguments)},find(e,t){return apply(this,"find",e,t,toReactive,arguments)},findIndex(e,t){return apply(this,"findIndex",e,t,void 0,arguments)},findLast(e,t){return apply(this,"findLast",e,t,toReactive,arguments)},findLastIndex(e,t){return apply(this,"findLastIndex",e,t,void 0,arguments)},forEach(e,t){return apply(this,"forEach",e,t,void 0,arguments)},includes(...e){return searchProxy(this,"includes",e)},indexOf(...e){return searchProxy(this,"indexOf",e)},join(e){return reactiveReadArray(this).join(e)},lastIndexOf(...e){return searchProxy(this,"lastIndexOf",e)},map(e,t){return apply(this,"map",e,t,void 0,arguments)},pop(){return noTracking(this,"pop")},push(...e){return noTracking(this,"push",e)},reduce(e,...t){return reduce(this,"reduce",e,t)},reduceRight(e,...t){return reduce(this,"reduceRight",e,t)},shift(){return noTracking(this,"shift")},some(e,t){return apply(this,"some",e,t,void 0,arguments)},splice(...e){return noTracking(this,"splice",e)},toReversed(){return reactiveReadArray(this).toReversed()},toSorted(e){return reactiveReadArray(this).toSorted(e)},toSpliced(...e){return reactiveReadArray(this).toSpliced(...e)},unshift(...e){return noTracking(this,"unshift",e)},values(){return iterator(this,"values",toReactive)}};function iterator(e,t,n){const o=shallowReadArray(e),r=o[t]();return o===e||isShallow(e)||(r._next=r.next,r.next=()=>{const e=r._next();return e.value&&(e.value=n(e.value)),e}),r}const H=Array.prototype;function apply(e,t,n,o,r,a){const s=shallowReadArray(e),i=s!==e&&!isShallow(e),c=s[t];if(c!==H[t]){const t=c.apply(e,a);return i?toReactive(t):t}let l=n;s!==e&&(i?l=function(t,o){return n.call(this,toReactive(t),o,e)}:n.length>2&&(l=function(t,o){return n.call(this,t,o,e)}));const d=c.call(s,l,o);return i&&r?r(d):d}function reduce(e,t,n,o){const r=shallowReadArray(e);let a=n;return r!==e&&(isShallow(e)?n.length>3&&(a=function(t,o,r){return n.call(this,t,o,r,e)}):a=function(t,o,r){return n.call(this,t,toReactive(o),r,e)}),r[t](a,...o)}function searchProxy(e,t,n){const o=toRaw(e);track(o,"iterate",j);const r=o[t](...n);return-1!==r&&!1!==r||!isProxy(n[0])?r:(n[0]=toRaw(n[0]),o[t](...n))}function noTracking(e,t,n=[]){pauseTracking(),startBatch();const o=toRaw(e)[t].apply(e,n);return endBatch(),resetTracking(),o}const F=makeMap("__proto__,__v_isRef,__isVue"),L=new Set(Object.getOwnPropertyNames(Symbol).filter(e=>"arguments"!==e&&"caller"!==e).map(e=>Symbol[e]).filter(isSymbol));function hasOwnProperty(e){isSymbol(e)||(e=String(e));const t=toRaw(this);return track(t,"has",e),t.hasOwnProperty(e)}class BaseReactiveHandler{constructor(e=!1,t=!1){this._isReadonly=e,this._isShallow=t}get(e,t,n){if("__v_skip"===t)return e.__v_skip;const o=this._isReadonly,r=this._isShallow;if("__v_isReactive"===t)return!o;if("__v_isReadonly"===t)return o;if("__v_isShallow"===t)return r;if("__v_raw"===t)return n===(o?r?te:ee:r?X:Q).get(e)||Object.getPrototypeOf(e)===Object.getPrototypeOf(n)?e:void 0;const a=l(e);if(!o){let e;if(a&&(e=z[t]))return e;if("hasOwnProperty"===t)return hasOwnProperty}const s=Reflect.get(e,t,isRef(e)?e:n);return(isSymbol(t)?L.has(t):F(t))?s:(o||track(e,"get",t),r?s:isRef(s)?a&&isIntegerKey(t)?s:s.value:isObject(s)?o?readonly(s):reactive(s):s)}}class MutableReactiveHandler extends BaseReactiveHandler{constructor(e=!1){super(!1,e)}set(e,t,n,o){let r=e[t];if(!this._isShallow){const t=isReadonly(r);if(isShallow(n)||isReadonly(n)||(r=toRaw(r),n=toRaw(n)),!l(e)&&isRef(r)&&!isRef(n))return!t&&(r.value=n,!0)}const a=l(e)&&isIntegerKey(t)?Number(t)<e.length:hasOwn(e,t),s=Reflect.set(e,t,n,isRef(e)?e:o);return e===toRaw(o)&&(a?hasChanged(n,r)&&trigger(e,"set",t,n,r):trigger(e,"add",t,n)),s}deleteProperty(e,t){const n=hasOwn(e,t),o=e[t],r=Reflect.deleteProperty(e,t);return r&&n&&trigger(e,"delete",t,void 0,o),r}has(e,t){const n=Reflect.has(e,t);return isSymbol(t)&&L.has(t)||track(e,"has",t),n}ownKeys(e){return track(e,"iterate",l(e)?"length":I),Reflect.ownKeys(e)}}class ReadonlyReactiveHandler extends BaseReactiveHandler{constructor(e=!1){super(!0,e)}set(e,t){return"production"!==process.env.NODE_ENV&&warn$2(`Set operation on key "${String(t)}" failed: target is readonly.`,e),!0}deleteProperty(e,t){return"production"!==process.env.NODE_ENV&&warn$2(`Delete operation on key "${String(t)}" failed: target is readonly.`,e),!0}}const q=new MutableReactiveHandler,W=new ReadonlyReactiveHandler,U=new MutableReactiveHandler(!0),G=new ReadonlyReactiveHandler(!0),toShallow=e=>e,getProto=e=>Reflect.getPrototypeOf(e);function createReadonlyMethod(e){return function(...t){if("production"!==process.env.NODE_ENV){const n=t[0]?`on key "${t[0]}" `:"";warn$2(`${g(e)} operation ${n}failed: target is readonly.`,toRaw(this))}return"delete"!==e&&("clear"===e?void 0:this)}}function createInstrumentations(e,t){const n={get(n){const o=this.__v_raw,r=toRaw(o),a=toRaw(n);e||(hasChanged(n,a)&&track(r,"get",n),track(r,"get",a));const{has:s}=getProto(r),i=t?toShallow:e?toReadonly:toReactive;return s.call(r,n)?i(o.get(n)):s.call(r,a)?i(o.get(a)):void(o!==r&&o.get(n))},get size(){const t=this.__v_raw;return!e&&track(toRaw(t),"iterate",I),Reflect.get(t,"size",t)},has(t){const n=this.__v_raw,o=toRaw(n),r=toRaw(t);return e||(hasChanged(t,r)&&track(o,"has",t),track(o,"has",r)),t===r?n.has(t):n.has(t)||n.has(r)},forEach(n,o){const r=this,a=r.__v_raw,s=toRaw(a),i=t?toShallow:e?toReadonly:toReactive;return!e&&track(s,"iterate",I),a.forEach((e,t)=>n.call(o,i(e),i(t),r))}};i(n,e?{add:createReadonlyMethod("add"),set:createReadonlyMethod("set"),delete:createReadonlyMethod("delete"),clear:createReadonlyMethod("clear")}:{add(e){t||isShallow(e)||isReadonly(e)||(e=toRaw(e));const n=toRaw(this);return getProto(n).has.call(n,e)||(n.add(e),trigger(n,"add",e,e)),this},set(e,n){t||isShallow(n)||isReadonly(n)||(n=toRaw(n));const o=toRaw(this),{has:r,get:a}=getProto(o);let s=r.call(o,e);s?"production"!==process.env.NODE_ENV&&checkIdentityKeys(o,r,e):(e=toRaw(e),s=r.call(o,e));const i=a.call(o,e);return o.set(e,n),s?hasChanged(n,i)&&trigger(o,"set",e,n,i):trigger(o,"add",e,n),this},delete(e){const t=toRaw(this),{has:n,get:o}=getProto(t);let r=n.call(t,e);r?"production"!==process.env.NODE_ENV&&checkIdentityKeys(t,n,e):(e=toRaw(e),r=n.call(t,e));const a=o?o.call(t,e):void 0,s=t.delete(e);return r&&trigger(t,"delete",e,void 0,a),s},clear(){const e=toRaw(this),t=0!==e.size,n="production"!==process.env.NODE_ENV?isMap(e)?new Map(e):new Set(e):void 0,o=e.clear();return t&&trigger(e,"clear",void 0,void 0,n),o}});return["keys","values","entries",Symbol.iterator].forEach(o=>{n[o]=function(e,t,n){return function(...o){const r=this.__v_raw,a=toRaw(r),s=isMap(a),i="entries"===e||e===Symbol.iterator&&s,c="keys"===e&&s,l=r[e](...o),d=n?toShallow:t?toReadonly:toReactive;return!t&&track(a,"iterate",c?T:I),{next(){const{value:e,done:t}=l.next();return t?{value:e,done:t}:{value:i?[d(e[0]),d(e[1])]:d(e),done:t}},[Symbol.iterator](){return this}}}}(o,e,t)}),n}function createInstrumentationGetter(e,t){const n=createInstrumentations(e,t);return(t,o,r)=>"__v_isReactive"===o?!e:"__v_isReadonly"===o?e:"__v_raw"===o?t:Reflect.get(hasOwn(n,o)&&o in t?n:t,o,r)}const K={get:createInstrumentationGetter(!1,!1)},J={get:createInstrumentationGetter(!1,!0)},Z={get:createInstrumentationGetter(!0,!1)},Y={get:createInstrumentationGetter(!0,!0)};function checkIdentityKeys(e,t,n){const o=toRaw(n);if(o!==n&&t.call(e,o)){const t=toRawType(e);warn$2(`Reactive ${t} contains both the raw and reactive versions of the same object${"Map"===t?" as keys":""}, which can lead to inconsistencies. Avoid differentiating between the raw and reactive versions of an object and only use the reactive version if possible.`)}}const Q=new WeakMap,X=new WeakMap,ee=new WeakMap,te=new WeakMap;function reactive(e){return isReadonly(e)?e:createReactiveObject(e,!1,q,K,Q)}function readonly(e){return createReactiveObject(e,!0,W,Z,ee)}function shallowReadonly(e){return createReactiveObject(e,!0,G,Y,te)}function createReactiveObject(e,t,n,o,r){if(!isObject(e))return"production"!==process.env.NODE_ENV&&warn$2(`value cannot be made ${t?"readonly":"reactive"}: ${String(e)}`),e;if(e.__v_raw&&(!t||!e.__v_isReactive))return e;const a=(s=e).__v_skip||!Object.isExtensible(s)?0:function(e){switch(e){case"Object":case"Array":return 1;case"Map":case"Set":case"WeakMap":case"WeakSet":return 2;default:return 0}}(toRawType(s));var s;if(0===a)return e;const i=r.get(e);if(i)return i;const c=new Proxy(e,2===a?o:n);return r.set(e,c),c}function isReactive(e){return isReadonly(e)?isReactive(e.__v_raw):!(!e||!e.__v_isReactive)}function isReadonly(e){return!(!e||!e.__v_isReadonly)}function isShallow(e){return!(!e||!e.__v_isShallow)}function isProxy(e){return!!e&&!!e.__v_raw}function toRaw(e){const t=e&&e.__v_raw;return t?toRaw(t):e}const toReactive=e=>isObject(e)?reactive(e):e,toReadonly=e=>isObject(e)?readonly(e):e;function isRef(e){return!!e&&!0===e.__v_isRef}function ref(e){return function(e,t){if(isRef(e))return e;return new RefImpl(e,t)}(e,!1)}class RefImpl{constructor(e,t){this.dep=new Dep,this.__v_isRef=!0,this.__v_isShallow=!1,this._rawValue=t?e:toRaw(e),this._value=t?e:toReactive(e),this.__v_isShallow=t}get value(){return"production"!==process.env.NODE_ENV?this.dep.track({target:this,type:"get",key:"value"}):this.dep.track(),this._value}set value(e){const t=this._rawValue,n=this.__v_isShallow||isShallow(e)||isReadonly(e);e=n?e:toRaw(e),hasChanged(e,t)&&(this._rawValue=e,this._value=n?e:toReactive(e),"production"!==process.env.NODE_ENV?this.dep.trigger({target:this,type:"set",key:"value",newValue:e,oldValue:t}):this.dep.trigger())}}const ne={get:(e,t,n)=>{return"__v_raw"===t?e:isRef(o=Reflect.get(e,t,n))?o.value:o;var o},set:(e,t,n,o)=>{const r=e[t];return isRef(r)&&!isRef(n)?(r.value=n,!0):Reflect.set(e,t,n,o)}};function proxyRefs(e){return isReactive(e)?e:new Proxy(e,ne)}class ComputedRefImpl{constructor(e,t,n){this.fn=e,this.setter=t,this._value=void 0,this.dep=new Dep(this),this.__v_isRef=!0,this.deps=void 0,this.depsTail=void 0,this.flags=16,this.globalVersion=B-1,this.next=void 0,this.effect=this,this.__v_isReadonly=!t,this.isSSR=n}notify(){if(this.flags|=16,!(8&this.flags||D===this))return batch(this,!0),!0;process.env.NODE_ENV}get value(){const e="production"!==process.env.NODE_ENV?this.dep.track({target:this,type:"get",key:"value"}):this.dep.track();return refreshComputed(this),e&&(e.version=this.dep.version),this._value}set value(e){this.setter?this.setter(e):"production"!==process.env.NODE_ENV&&warn$2("Write operation failed: computed value is readonly")}}const oe={},re=new WeakMap;let ae;function watch$1(e,t,n=a){const{immediate:o,deep:r,once:s,scheduler:i,augmentJob:c,call:d}=n,warnInvalidSource=e=>{(n.onWarn||warn$2)("Invalid watch source: ",e,"A watch source can only be a getter/effect function, a ref, a reactive object, or an array of these types.")},reactiveGetter=e=>r?e:isShallow(e)||!1===r||0===r?traverse(e,1):traverse(e);let p,u,f,v,h=!1,m=!1;if(isRef(e)?(u=()=>e.value,h=isShallow(e)):isReactive(e)?(u=()=>reactiveGetter(e),h=!0):l(e)?(m=!0,h=e.some(e=>isReactive(e)||isShallow(e)),u=()=>e.map(e=>isRef(e)?e.value:isReactive(e)?reactiveGetter(e):isFunction(e)?d?d(e,2):e():void("production"!==process.env.NODE_ENV&&warnInvalidSource(e)))):isFunction(e)?u=t?d?()=>d(e,2):e:()=>{if(f){pauseTracking();try{f()}finally{resetTracking()}}const t=ae;ae=p;try{return d?d(e,3,[v]):e(v)}finally{ae=t}}:(u=NOOP,"production"!==process.env.NODE_ENV&&warnInvalidSource(e)),t&&r){const e=u,t=!0===r?1/0:r;u=()=>traverse(e(),t)}const g=O,watchHandle=()=>{p.stop(),g&&g.active&&remove(g.effects,p)};if(s&&t){const e=t;t=(...t)=>{e(...t),watchHandle()}}let b=m?new Array(e.length).fill(oe):oe;const job=e=>{if(1&p.flags&&(p.dirty||e))if(t){const e=p.run();if(r||h||(m?e.some((e,t)=>hasChanged(e,b[t])):hasChanged(e,b))){f&&f();const n=ae;ae=p;try{const n=[e,b===oe?void 0:m&&b[0]===oe?[]:b,v];b=e,d?d(t,3,n):t(...n)}finally{ae=n}}}else p.run()};return c&&c(job),p=new ReactiveEffect(u),p.scheduler=i?()=>i(job,!1):job,v=e=>function(e,t=!1,n=ae){if(n){let t=re.get(n);t||re.set(n,t=[]),t.push(e)}else"production"===process.env.NODE_ENV||t||warn$2("onWatcherCleanup() was called when there was no active watcher to associate with.")}(e,!1,p),f=p.onStop=()=>{const e=re.get(p);if(e){if(d)d(e,4);else for(const t of e)t();re.delete(p)}},"production"!==process.env.NODE_ENV&&(p.onTrack=n.onTrack,p.onTrigger=n.onTrigger),t?o?job(!0):b=p.run():i?i(job.bind(null,!0),!0):p.run(),watchHandle.pause=p.pause.bind(p),watchHandle.resume=p.resume.bind(p),watchHandle.stop=watchHandle,watchHandle}function traverse(e,t=1/0,n){if(t<=0||!isObject(e)||e.__v_skip)return e;if((n=n||new Set).has(e))return e;if(n.add(e),t--,isRef(e))traverse(e.value,t,n);else if(l(e))for(let o=0;o<e.length;o++)traverse(e[o],t,n);else if(isSet(e)||isMap(e))e.forEach(e=>{traverse(e,t,n)});else if(isPlainObject(e)){for(const o in e)traverse(e[o],t,n);for(const o of Object.getOwnPropertySymbols(e))Object.prototype.propertyIsEnumerable.call(e,o)&&traverse(e[o],t,n)}return e}
+/**
+  * @vue/runtime-core v3.5.18
+  * (c) 2018-present Yuxi (Evan) You and Vue contributors
+  * @license MIT
+  **/const se=[];function pushWarningContext(e){se.push(e)}function popWarningContext(){se.pop()}let ie=!1;function warn$1(e,...t){if(ie)return;ie=!0,pauseTracking();const n=se.length?se[se.length-1].component:null,o=n&&n.appContext.config.warnHandler,r=function(){let e=se[se.length-1];if(!e)return[];const t=[];for(;e;){const n=t[0];n&&n.vnode===e?n.recurseCount++:t.push({vnode:e,recurseCount:0});const o=e.component&&e.component.parent;e=o&&o.vnode}return t}();if(o)callWithErrorHandling(o,n,11,[e+t.map(e=>{var t,n;return null!=(n=null==(t=e.toString)?void 0:t.call(e))?n:JSON.stringify(e)}).join(""),n&&n.proxy,r.map(({vnode:e})=>`at <${formatComponentName(n,e.type)}>`).join("\n"),r]);else{const n=[`[Vue warn]: ${e}`,...t];r.length&&n.push("\n",...function(e){const t=[];return e.forEach((e,n)=>{t.push(...0===n?[]:["\n"],...function({vnode:e,recurseCount:t}){const n=t>0?`... (${t} recursive calls)`:"",o=!!e.component&&null==e.component.parent,r=` at <${formatComponentName(e.component,e.type,o)}`,a=">"+n;return e.props?[r,...formatProps(e.props),a]:[r+a]}(e))}),t}(r)),console.warn(...n)}resetTracking(),ie=!1}function formatProps(e){const t=[],n=Object.keys(e);return n.slice(0,3).forEach(n=>{t.push(...formatProp(n,e[n]))}),n.length>3&&t.push(" ..."),t}function formatProp(e,t,n){return isString(t)?(t=JSON.stringify(t),n?t:[`${e}=${t}`]):"number"==typeof t||"boolean"==typeof t||null==t?n?t:[`${e}=${t}`]:isRef(t)?(t=formatProp(e,toRaw(t.value),!0),n?t:[`${e}=Ref<`,t,">"]):isFunction(t)?[`${e}=fn${t.name?`<${t.name}>`:""}`]:(t=toRaw(t),n?t:[`${e}=`,t])}const ce={sp:"serverPrefetch hook",bc:"beforeCreate hook",c:"created hook",bm:"beforeMount hook",m:"mounted hook",bu:"beforeUpdate hook",u:"updated",bum:"beforeUnmount hook",um:"unmounted hook",a:"activated hook",da:"deactivated hook",ec:"errorCaptured hook",rtc:"renderTracked hook",rtg:"renderTriggered hook",0:"setup function",1:"render function",2:"watcher getter",3:"watcher callback",4:"watcher cleanup function",5:"native event handler",6:"component event handler",7:"vnode hook",8:"directive hook",9:"transition hook",10:"app errorHandler",11:"app warnHandler",12:"ref function",13:"async component loader",14:"scheduler flush",15:"component update",16:"app unmount cleanup function"};function callWithErrorHandling(e,t,n,o){try{return o?e(...o):e()}catch(r){handleError(r,t,n)}}function callWithAsyncErrorHandling(e,t,n,o){if(isFunction(e)){const r=callWithErrorHandling(e,t,n,o);return r&&isPromise(r)&&r.catch(e=>{handleError(e,t,n)}),r}if(l(e)){const r=[];for(let a=0;a<e.length;a++)r.push(callWithAsyncErrorHandling(e[a],t,n,o));return r}"production"!==process.env.NODE_ENV&&warn$1("Invalid value type passed to callWithAsyncErrorHandling(): "+typeof e)}function handleError(e,t,n,o=!0){const r=t?t.vnode:null,{errorHandler:s,throwUnhandledErrorInProduction:i}=t&&t.appContext.config||a;if(t){let o=t.parent;const r=t.proxy,a="production"!==process.env.NODE_ENV?ce[n]:`https://vuejs.org/error-reference/#runtime-${n}`;for(;o;){const t=o.ec;if(t)for(let n=0;n<t.length;n++)if(!1===t[n](e,r,a))return;o=o.parent}if(s)return pauseTracking(),callWithErrorHandling(s,null,10,[e,r,a]),void resetTracking()}!function(e,t,n,o=!0,r=!1){if("production"!==process.env.NODE_ENV){const r=ce[t];if(n&&pushWarningContext(n),warn$1("Unhandled error"+(r?` during execution of ${r}`:"")),n&&popWarningContext(),o)throw e;console.error(e)}else{if(r)throw e;console.error(e)}}(e,n,r,o,i)}const le=[];let de=-1;const pe=[];let ue=null,fe=0;const ve=Promise.resolve();let he=null;function nextTick(e){const t=he||ve;return e?t.then(this?e.bind(this):e):t}function queueJob(e){if(!(1&e.flags)){const t=getId(e),n=le[le.length-1];!n||!(2&e.flags)&&t>=getId(n)?le.push(e):le.splice(function(e){let t=de+1,n=le.length;for(;t<n;){const o=t+n>>>1,r=le[o],a=getId(r);a<e||a===e&&2&r.flags?t=o+1:n=o}return t}(t),0,e),e.flags|=1,queueFlush()}}function queueFlush(){he||(he=ve.then(flushJobs))}function queuePostFlushCb(e){l(e)?pe.push(...e):ue&&-1===e.id?ue.splice(fe+1,0,e):1&e.flags||(pe.push(e),e.flags|=1),queueFlush()}function flushPreFlushCbs(e,t,n=de+1){for("production"!==process.env.NODE_ENV&&(t=t||new Map);n<le.length;n++){const o=le[n];if(o&&2&o.flags){if(e&&o.id!==e.uid)continue;if("production"!==process.env.NODE_ENV&&checkRecursiveUpdates(t,o))continue;le.splice(n,1),n--,4&o.flags&&(o.flags&=-2),o(),4&o.flags||(o.flags&=-2)}}}function flushPostFlushCbs(e){if(pe.length){const t=[...new Set(pe)].sort((e,t)=>getId(e)-getId(t));if(pe.length=0,ue)return void ue.push(...t);for(ue=t,"production"!==process.env.NODE_ENV&&(e=e||new Map),fe=0;fe<ue.length;fe++){const t=ue[fe];"production"!==process.env.NODE_ENV&&checkRecursiveUpdates(e,t)||(4&t.flags&&(t.flags&=-2),8&t.flags||t(),t.flags&=-2)}ue=null,fe=0}}const getId=e=>null==e.id?2&e.flags?-1:1/0:e.id;function flushJobs(e){"production"!==process.env.NODE_ENV&&(e=e||new Map);const t="production"!==process.env.NODE_ENV?t=>checkRecursiveUpdates(e,t):NOOP;try{for(de=0;de<le.length;de++){const e=le[de];if(e&&!(8&e.flags)){if("production"!==process.env.NODE_ENV&&t(e))continue;4&e.flags&&(e.flags&=-2),callWithErrorHandling(e,e.i,e.i?15:14),4&e.flags||(e.flags&=-2)}}}finally{for(;de<le.length;de++){const e=le[de];e&&(e.flags&=-2)}de=-1,le.length=0,flushPostFlushCbs(e),he=null,(le.length||pe.length)&&flushJobs(e)}}function checkRecursiveUpdates(e,t){const n=e.get(t)||0;if(n>100){const e=t.i,n=e&&getComponentName(e.type);return handleError(`Maximum recursive updates exceeded${n?` in component <${n}>`:""}. This means you have a reactive effect that is mutating its own dependencies and thus recursively triggering itself. Possible sources include component template, render function, updated hook or watcher source function.`,null,10),!0}return e.set(t,n+1),!1}let me=!1;const ge=new Map;"production"!==process.env.NODE_ENV&&(getGlobalThis().__VUE_HMR_RUNTIME__={createRecord:tryWrap(createRecord),rerender:tryWrap(function(e,t){const n=be.get(e);if(!n)return;n.initialDef.render=t,[...n.instances].forEach(e=>{t&&(e.render=t,normalizeClassComponent(e.type).render=t),e.renderCache=[],me=!0,e.update(),me=!1})}),reload:tryWrap(function(e,t){const n=be.get(e);if(!n)return;t=normalizeClassComponent(t),updateComponentDef(n.initialDef,t);const o=[...n.instances];for(let r=0;r<o.length;r++){const e=o[r],a=normalizeClassComponent(e.type);let s=ge.get(a);s||(a!==n.initialDef&&updateComponentDef(a,t),ge.set(a,s=new Set)),s.add(e),e.appContext.propsCache.delete(e.type),e.appContext.emitsCache.delete(e.type),e.appContext.optionsCache.delete(e.type),e.ceReload?(s.add(e),e.ceReload(t.styles),s.delete(e)):e.parent?queueJob(()=>{me=!0,e.parent.update(),me=!1,s.delete(e)}):e.appContext.reload?e.appContext.reload():"undefined"!=typeof window?window.location.reload():console.warn("[HMR] Root or manually mounted instance modified. Full reload required."),e.root.ce&&e!==e.root&&e.root.ce._removeChildStyle(a)}queuePostFlushCb(()=>{ge.clear()})})});const be=new Map;function createRecord(e,t){return!be.has(e)&&(be.set(e,{initialDef:normalizeClassComponent(t),instances:new Set}),!0)}function normalizeClassComponent(e){return isClassComponent(e)?e.__vccOpts:e}function updateComponentDef(e,t){i(e,t);for(const n in e)"__file"===n||n in t||delete e[n]}function tryWrap(e){return(t,n)=>{try{return e(t,n)}catch(o){console.error(o),console.warn("[HMR] Something went wrong during Vue component hot-reload. Full reload required.")}}}let ye,_e=[],Ne=!1;function emit$1(e,...t){ye?ye.emit(e,...t):Ne||_e.push({event:e,args:t})}function setDevtoolsHook$1(e,t){var n,o;if(ye=e,ye)ye.enabled=!0,_e.forEach(({event:e,args:t})=>ye.emit(e,...t)),_e=[];else if("undefined"!=typeof window&&window.HTMLElement&&!(null==(o=null==(n=window.navigator)?void 0:n.userAgent)?void 0:o.includes("jsdom"))){(t.__VUE_DEVTOOLS_HOOK_REPLAY__=t.__VUE_DEVTOOLS_HOOK_REPLAY__||[]).push(e=>{setDevtoolsHook$1(e,t)}),setTimeout(()=>{ye||(t.__VUE_DEVTOOLS_HOOK_REPLAY__=null,Ne=!0,_e=[])},3e3)}else Ne=!0,_e=[]}const we=createDevtoolsComponentHook("component:added"),Ee=createDevtoolsComponentHook("component:updated"),ke=createDevtoolsComponentHook("component:removed");
+/*! #__NO_SIDE_EFFECTS__ */
+function createDevtoolsComponentHook(e){return t=>{emit$1(e,t.appContext.app,t.uid,t.parent?t.parent.uid:void 0,t)}}const xe=createDevtoolsPerformanceHook("perf:start"),Ve=createDevtoolsPerformanceHook("perf:end");function createDevtoolsPerformanceHook(e){return(t,n,o)=>{emit$1(e,t.appContext.app,t.uid,t,n,o)}}let Oe=null,De=null;function setCurrentRenderingInstance(e){const t=Oe;return Oe=e,De=e&&e.type.__scopeId||null,t}function validateDirectiveName(e){u(e)&&warn$1("Do not use built-in directive ids as custom directive id: "+e)}function invokeDirectiveHook(e,t,n,o){const r=e.dirs,a=t&&t.dirs;for(let s=0;s<r.length;s++){const i=r[s];a&&(i.oldValue=a[s].value);let c=i.dir[o];c&&(pauseTracking(),callWithAsyncErrorHandling(c,n,8,[e.el,i,e,t]),resetTracking())}}const Ce=Symbol("_vte");function setTransitionHooks(e,t){6&e.shapeFlag&&e.component?(e.transition=t,setTransitionHooks(e.component.subTree,t)):128&e.shapeFlag?(e.ssContent.transition=t.clone(e.ssContent),e.ssFallback.transition=t.clone(e.ssFallback)):e.transition=t}function markAsyncBoundary(e){e.ids=[e.ids[0]+e.ids[2]+++"-",0,0]}const Re=new WeakSet;function setRef(e,t,n,o,r=!1){if(l(e))return void e.forEach((e,a)=>setRef(e,t&&(l(t)?t[a]:t),n,o,r));if(isAsyncWrapper(o)&&!r)return void(512&o.shapeFlag&&o.type.__asyncResolved&&o.component.subTree.component&&setRef(e,t,n,o.component.subTree));const s=4&o.shapeFlag?getComponentPublicInstance(o.component):o.el,i=r?null:s,{i:c,r:d}=e;if("production"!==process.env.NODE_ENV&&!c)return void warn$1("Missing ref owner context. ref cannot be used on hoisted vnodes. A vnode with ref must be created inside the render function.");const p=t&&t.r,u=c.refs===a?c.refs={}:c.refs,f=c.setupState,v=toRaw(f),h=f===a?()=>!1:e=>("production"===process.env.NODE_ENV||(hasOwn(v,e)&&!isRef(v[e])&&warn$1(`Template ref "${e}" used on a non-ref value. It will not work in the production build.`),!Re.has(v[e])))&&hasOwn(v,e);if(null!=p&&p!==d&&(isString(p)?(u[p]=null,h(p)&&(f[p]=null)):isRef(p)&&(p.value=null)),isFunction(d))callWithErrorHandling(d,c,12,[i,u]);else{const t=isString(d),o=isRef(d);if(t||o){const doSet=()=>{if(e.f){const n=t?h(d)?f[d]:u[d]:d.value;r?l(n)&&remove(n,s):l(n)?n.includes(s)||n.push(s):t?(u[d]=[s],h(d)&&(f[d]=u[d])):(d.value=[s],e.k&&(u[e.k]=d.value))}else t?(u[d]=i,h(d)&&(f[d]=i)):o?(d.value=i,e.k&&(u[e.k]=i)):"production"!==process.env.NODE_ENV&&warn$1("Invalid template ref type:",d,`(${typeof d})`)};i?(doSet.id=-1,queuePostRenderEffect(doSet,n)):doSet()}else"production"!==process.env.NODE_ENV&&warn$1("Invalid template ref type:",d,`(${typeof d})`)}}getGlobalThis().requestIdleCallback,getGlobalThis().cancelIdleCallback;const isAsyncWrapper=e=>!!e.type.__asyncLoader,isKeepAlive=e=>e.type.__isKeepAlive;function onActivated(e,t){registerKeepAliveHook(e,"a",t)}function onDeactivated(e,t){registerKeepAliveHook(e,"da",t)}function registerKeepAliveHook(e,t,n=dt){const o=e.__wdc||(e.__wdc=()=>{let t=n;for(;t;){if(t.isDeactivated)return;t=t.parent}return e()});if(injectHook(t,o,n),n){let e=n.parent;for(;e&&e.parent;)isKeepAlive(e.parent.vnode)&&injectToKeepAliveRoot(o,t,n,e),e=e.parent}}function injectToKeepAliveRoot(e,t,n,o){const r=injectHook(t,e,o,!0);Me(()=>{remove(o[t],r)},n)}function injectHook(e,t,n=dt,o=!1){if(n){const r=n[e]||(n[e]=[]),a=t.__weh||(t.__weh=(...o)=>{pauseTracking();const r=setCurrentInstance(n),a=callWithAsyncErrorHandling(t,n,e,o);return r(),resetTracking(),a});return o?r.unshift(a):r.push(a),a}if("production"!==process.env.NODE_ENV){warn$1(`${b(ce[e].replace(/ hook$/,""))} is called when there is no active component instance to be associated with. Lifecycle injection APIs can only be used during execution of setup(). If you are using async setup(), make sure to register lifecycle hooks before the first await statement.`)}}const createHook=e=>(t,n=dt)=>{vt&&"sp"!==e||injectHook(e,(...e)=>t(...e),n)},Se=createHook("bm"),$e=createHook("m"),Ae=createHook("bu"),Pe=createHook("u"),Be=createHook("bum"),Me=createHook("um"),Ie=createHook("sp"),Te=createHook("rtg"),je=createHook("rtc");function onErrorCaptured(e,t=dt){injectHook("ec",e,t)}function resolveComponent(e,t){return function(e,t,n=!0,o=!1){const r=Oe||dt;if(r){const a=r.type;{const e=getComponentName(a,!1);if(e&&(e===t||e===v(t)||e===g(v(t))))return a}const s=resolve(r[e]||a[e],t)||resolve(r.appContext[e],t);if(!s&&o)return a;if("production"!==process.env.NODE_ENV&&n&&!s){const n="\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement.";warn$1(`Failed to resolve ${e.slice(0,-1)}: ${t}${n}`)}return s}"production"!==process.env.NODE_ENV&&warn$1(`resolve${g(e.slice(0,-1))} can only be used in render() or setup().`)}("components",e,!0,t)||e}const ze=Symbol.for("v-ndc");function resolve(e,t){return e&&(e[t]||e[v(t)]||e[g(v(t))])}function renderList(e,t,n,o){let r;const a=n,s=l(e);if(s||isString(e)){let n=!1,o=!1;s&&isReactive(e)&&(n=!isShallow(e),o=isReadonly(e),e=shallowReadArray(e)),r=new Array(e.length);for(let s=0,i=e.length;s<i;s++)r[s]=t(n?o?toReadonly(toReactive(e[s])):toReactive(e[s]):e[s],s,void 0,a)}else if("number"==typeof e){"production"===process.env.NODE_ENV||Number.isInteger(e)||warn$1(`The v-for range expect an integer value but got ${e}.`),r=new Array(e);for(let n=0;n<e;n++)r[n]=t(n+1,n,void 0,a)}else if(isObject(e))if(e[Symbol.iterator])r=Array.from(e,(e,n)=>t(e,n,void 0,a));else{const n=Object.keys(e);r=new Array(n.length);for(let o=0,s=n.length;o<s;o++){const s=n[o];r[o]=t(e[s],s,o,a)}}else r=[];return r}const getPublicInstance=e=>e?isStatefulComponent(e)?getComponentPublicInstance(e):getPublicInstance(e.parent):null,He=i(Object.create(null),{$:e=>e,$el:e=>e.vnode.el,$data:e=>e.data,$props:e=>"production"!==process.env.NODE_ENV?shallowReadonly(e.props):e.props,$attrs:e=>"production"!==process.env.NODE_ENV?shallowReadonly(e.attrs):e.attrs,$slots:e=>"production"!==process.env.NODE_ENV?shallowReadonly(e.slots):e.slots,$refs:e=>"production"!==process.env.NODE_ENV?shallowReadonly(e.refs):e.refs,$parent:e=>getPublicInstance(e.parent),$root:e=>getPublicInstance(e.root),$host:e=>e.ce,$emit:e=>e.emit,$options:e=>resolveMergedOptions(e),$forceUpdate:e=>e.f||(e.f=()=>{queueJob(e.update)}),$nextTick:e=>e.n||(e.n=nextTick.bind(e.proxy)),$watch:e=>instanceWatch.bind(e)}),isReservedPrefix=e=>"_"===e||"$"===e,hasSetupBinding=(e,t)=>e!==a&&!e.__isScriptSetup&&hasOwn(e,t),Fe={get({_:e},t){if("__v_skip"===t)return!0;const{ctx:n,setupState:o,data:r,props:s,accessCache:i,type:c,appContext:l}=e;if("production"!==process.env.NODE_ENV&&"__isVue"===t)return!0;let d;if("$"!==t[0]){const c=i[t];if(void 0!==c)switch(c){case 1:return o[t];case 2:return r[t];case 4:return n[t];case 3:return s[t]}else{if(hasSetupBinding(o,t))return i[t]=1,o[t];if(r!==a&&hasOwn(r,t))return i[t]=2,r[t];if((d=e.propsOptions[0])&&hasOwn(d,t))return i[t]=3,s[t];if(n!==a&&hasOwn(n,t))return i[t]=4,n[t];Le&&(i[t]=0)}}const p=He[t];let u,f;return p?("$attrs"===t?(track(e.attrs,"get",""),"production"!==process.env.NODE_ENV&&markAttrsAccessed()):"production"!==process.env.NODE_ENV&&"$slots"===t&&track(e,"get",t),p(e)):(u=c.__cssModules)&&(u=u[t])?u:n!==a&&hasOwn(n,t)?(i[t]=4,n[t]):(f=l.config.globalProperties,hasOwn(f,t)?f[t]:void("production"===process.env.NODE_ENV||!Oe||isString(t)&&0===t.indexOf("__v")||(r!==a&&isReservedPrefix(t[0])&&hasOwn(r,t)?warn$1(`Property ${JSON.stringify(t)} must be accessed via $data because it starts with a reserved character ("$" or "_") and is not proxied on the render context.`):e===Oe&&warn$1(`Property ${JSON.stringify(t)} was accessed during render but is not defined on instance.`))))},set({_:e},t,n){const{data:o,setupState:r,ctx:s}=e;return hasSetupBinding(r,t)?(r[t]=n,!0):"production"!==process.env.NODE_ENV&&r.__isScriptSetup&&hasOwn(r,t)?(warn$1(`Cannot mutate <script setup> binding "${t}" from Options API.`),!1):o!==a&&hasOwn(o,t)?(o[t]=n,!0):hasOwn(e.props,t)?("production"!==process.env.NODE_ENV&&warn$1(`Attempting to mutate prop "${t}". Props are readonly.`),!1):"$"===t[0]&&t.slice(1)in e?("production"!==process.env.NODE_ENV&&warn$1(`Attempting to mutate public property "${t}". Properties starting with $ are reserved and readonly.`),!1):("production"!==process.env.NODE_ENV&&t in e.appContext.config.globalProperties?Object.defineProperty(s,t,{enumerable:!0,configurable:!0,value:n}):s[t]=n,!0)},has({_:{data:e,setupState:t,accessCache:n,ctx:o,appContext:r,propsOptions:s}},i){let c;return!!n[i]||e!==a&&hasOwn(e,i)||hasSetupBinding(t,i)||(c=s[0])&&hasOwn(c,i)||hasOwn(o,i)||hasOwn(He,i)||hasOwn(r.config.globalProperties,i)},defineProperty(e,t,n){return null!=n.get?e._.accessCache[t]=0:hasOwn(n,"value")&&this.set(e,t,n.value,null),Reflect.defineProperty(e,t,n)}};function normalizePropsOrEmits(e){return l(e)?e.reduce((e,t)=>(e[t]=null,e),{}):e}"production"!==process.env.NODE_ENV&&(Fe.ownKeys=e=>(warn$1("Avoid app logic that relies on enumerating keys on a component instance. The keys will be empty in production mode to avoid performance overhead."),Reflect.ownKeys(e)));let Le=!0;function applyOptions(e){const t=resolveMergedOptions(e),n=e.proxy,o=e.ctx;Le=!1,t.beforeCreate&&callHook(t.beforeCreate,e,"bc");const{data:r,computed:a,methods:s,watch:i,provide:c,inject:d,created:p,beforeMount:u,mounted:f,beforeUpdate:v,updated:h,activated:m,deactivated:g,beforeDestroy:b,beforeUnmount:y,destroyed:_,unmounted:N,render:w,renderTracked:E,renderTriggered:k,errorCaptured:x,serverPrefetch:V,expose:O,inheritAttrs:D,components:C,directives:R,filters:S}=t,$="production"!==process.env.NODE_ENV?function(){const e=Object.create(null);return(t,n)=>{e[n]?warn$1(`${t} property "${n}" is already defined in ${e[n]}.`):e[n]=t}}():null;if("production"!==process.env.NODE_ENV){const[t]=e.propsOptions;if(t)for(const e in t)$("Props",e)}if(d&&function(e,t,n=NOOP){l(e)&&(e=normalizeInject(e));for(const o in e){const r=e[o];let a;a=isObject(r)?"default"in r?inject(r.from||o,r.default,!0):inject(r.from||o):inject(r),isRef(a)?Object.defineProperty(t,o,{enumerable:!0,configurable:!0,get:()=>a.value,set:e=>a.value=e}):t[o]=a,"production"!==process.env.NODE_ENV&&n("Inject",o)}}(d,o,$),s)for(const l in s){const e=s[l];isFunction(e)?("production"!==process.env.NODE_ENV?Object.defineProperty(o,l,{value:e.bind(n),configurable:!0,enumerable:!0,writable:!0}):o[l]=e.bind(n),"production"!==process.env.NODE_ENV&&$("Methods",l)):"production"!==process.env.NODE_ENV&&warn$1(`Method "${l}" has type "${typeof e}" in the component definition. Did you reference the function correctly?`)}if(r){"production"===process.env.NODE_ENV||isFunction(r)||warn$1("The data option must be a function. Plain object usage is no longer supported.");const t=r.call(n,n);if("production"!==process.env.NODE_ENV&&isPromise(t)&&warn$1("data() returned a Promise - note data() cannot be async; If you intend to perform data fetching before component renders, use async setup() + <Suspense>."),isObject(t)){if(e.data=reactive(t),"production"!==process.env.NODE_ENV)for(const e in t)$("Data",e),isReservedPrefix(e[0])||Object.defineProperty(o,e,{configurable:!0,enumerable:!0,get:()=>t[e],set:NOOP})}else"production"!==process.env.NODE_ENV&&warn$1("data() should return an object.")}if(Le=!0,a)for(const l in a){const e=a[l],t=isFunction(e)?e.bind(n,n):isFunction(e.get)?e.get.bind(n,n):NOOP;"production"!==process.env.NODE_ENV&&t===NOOP&&warn$1(`Computed property "${l}" has no getter.`);const r=!isFunction(e)&&isFunction(e.set)?e.set.bind(n):"production"!==process.env.NODE_ENV?()=>{warn$1(`Write operation failed: computed property "${l}" is readonly.`)}:NOOP,s=computed({get:t,set:r});Object.defineProperty(o,l,{enumerable:!0,configurable:!0,get:()=>s.value,set:e=>s.value=e}),"production"!==process.env.NODE_ENV&&$("Computed",l)}if(i)for(const l in i)createWatcher(i[l],o,n,l);if(c){const e=isFunction(c)?c.call(n):c;Reflect.ownKeys(e).forEach(t=>{!function(e,t){if(dt){let n=dt.provides;const o=dt.parent&&dt.parent.provides;o===n&&(n=dt.provides=Object.create(o)),n[e]=t}else"production"!==process.env.NODE_ENV&&warn$1("provide() can only be used inside setup().")}(t,e[t])})}function registerLifecycleHook(e,t){l(t)?t.forEach(t=>e(t.bind(n))):t&&e(t.bind(n))}if(p&&callHook(p,e,"c"),registerLifecycleHook(Se,u),registerLifecycleHook($e,f),registerLifecycleHook(Ae,v),registerLifecycleHook(Pe,h),registerLifecycleHook(onActivated,m),registerLifecycleHook(onDeactivated,g),registerLifecycleHook(onErrorCaptured,x),registerLifecycleHook(je,E),registerLifecycleHook(Te,k),registerLifecycleHook(Be,y),registerLifecycleHook(Me,N),registerLifecycleHook(Ie,V),l(O))if(O.length){const t=e.exposed||(e.exposed={});O.forEach(e=>{Object.defineProperty(t,e,{get:()=>n[e],set:t=>n[e]=t,enumerable:!0})})}else e.exposed||(e.exposed={});w&&e.render===NOOP&&(e.render=w),null!=D&&(e.inheritAttrs=D),C&&(e.components=C),R&&(e.directives=R),V&&markAsyncBoundary(e)}function callHook(e,t,n){callWithAsyncErrorHandling(l(e)?e.map(e=>e.bind(t.proxy)):e.bind(t.proxy),t,n)}function createWatcher(e,t,n,o){let r=o.includes(".")?createPathGetter(n,o):()=>n[o];if(isString(e)){const n=t[e];isFunction(n)?watch(r,n):"production"!==process.env.NODE_ENV&&warn$1(`Invalid watch handler specified by key "${e}"`,n)}else if(isFunction(e))watch(r,e.bind(n));else if(isObject(e))if(l(e))e.forEach(e=>createWatcher(e,t,n,o));else{const o=isFunction(e.handler)?e.handler.bind(n):t[e.handler];isFunction(o)?watch(r,o,e):"production"!==process.env.NODE_ENV&&warn$1(`Invalid watch handler specified by key "${e.handler}"`,o)}else"production"!==process.env.NODE_ENV&&warn$1(`Invalid watch option: "${o}"`,e)}function resolveMergedOptions(e){const t=e.type,{mixins:n,extends:o}=t,{mixins:r,optionsCache:a,config:{optionMergeStrategies:s}}=e.appContext,i=a.get(t);let c;return i?c=i:r.length||n||o?(c={},r.length&&r.forEach(e=>mergeOptions(c,e,s,!0)),mergeOptions(c,t,s)):c=t,isObject(t)&&a.set(t,c),c}function mergeOptions(e,t,n,o=!1){const{mixins:r,extends:a}=t;a&&mergeOptions(e,a,n,!0),r&&r.forEach(t=>mergeOptions(e,t,n,!0));for(const s in t)if(o&&"expose"===s)"production"!==process.env.NODE_ENV&&warn$1('"expose" option is ignored when declared in mixins or extends. It should only be declared in the base component itself.');else{const o=qe[s]||n&&n[s];e[s]=o?o(e[s],t[s]):t[s]}return e}const qe={data:mergeDataFn,props:mergeEmitsOrPropsOptions,emits:mergeEmitsOrPropsOptions,methods:mergeObjectOptions,computed:mergeObjectOptions,beforeCreate:mergeAsArray,created:mergeAsArray,beforeMount:mergeAsArray,mounted:mergeAsArray,beforeUpdate:mergeAsArray,updated:mergeAsArray,beforeDestroy:mergeAsArray,beforeUnmount:mergeAsArray,destroyed:mergeAsArray,unmounted:mergeAsArray,activated:mergeAsArray,deactivated:mergeAsArray,errorCaptured:mergeAsArray,serverPrefetch:mergeAsArray,components:mergeObjectOptions,directives:mergeObjectOptions,watch:function(e,t){if(!e)return t;if(!t)return e;const n=i(Object.create(null),e);for(const o in t)n[o]=mergeAsArray(e[o],t[o]);return n},provide:mergeDataFn,inject:function(e,t){return mergeObjectOptions(normalizeInject(e),normalizeInject(t))}};function mergeDataFn(e,t){return t?e?function(){return i(isFunction(e)?e.call(this,this):e,isFunction(t)?t.call(this,this):t)}:t:e}function normalizeInject(e){if(l(e)){const t={};for(let n=0;n<e.length;n++)t[e[n]]=e[n];return t}return e}function mergeAsArray(e,t){return e?[...new Set([].concat(e,t))]:t}function mergeObjectOptions(e,t){return e?i(Object.create(null),e,t):t}function mergeEmitsOrPropsOptions(e,t){return e?l(e)&&l(t)?[...new Set([...e,...t])]:i(Object.create(null),normalizePropsOrEmits(e),normalizePropsOrEmits(null!=t?t:{})):t}function createAppContext(){return{app:null,config:{isNativeTag:NO,performance:!1,globalProperties:{},optionMergeStrategies:{},errorHandler:void 0,warnHandler:void 0,compilerOptions:{}},mixins:[],components:{},directives:{},provides:Object.create(null),optionsCache:new WeakMap,propsCache:new WeakMap,emitsCache:new WeakMap}}let We=0;function createAppAPI(e,t){return function(t,n=null){isFunction(t)||(t=i({},t)),null==n||isObject(n)||("production"!==process.env.NODE_ENV&&warn$1("root props passed to app.mount() must be an object."),n=null);const o=createAppContext(),r=new WeakSet,a=[];let s=!1;const c=o.app={_uid:We++,_component:t,_props:n,_container:null,_context:o,_instance:null,version:gt,get config(){return o.config},set config(e){"production"!==process.env.NODE_ENV&&warn$1("app.config cannot be replaced. Modify individual options instead.")},use:(e,...t)=>(r.has(e)?"production"!==process.env.NODE_ENV&&warn$1("Plugin has already been applied to target app."):e&&isFunction(e.install)?(r.add(e),e.install(c,...t)):isFunction(e)?(r.add(e),e(c,...t)):"production"!==process.env.NODE_ENV&&warn$1('A plugin must either be a function or an object with an "install" function.'),c),mixin:e=>(o.mixins.includes(e)?"production"!==process.env.NODE_ENV&&warn$1("Mixin has already been applied to target app"+(e.name?`: ${e.name}`:"")):o.mixins.push(e),c),component:(e,t)=>("production"!==process.env.NODE_ENV&&validateComponentName(e,o.config),t?("production"!==process.env.NODE_ENV&&o.components[e]&&warn$1(`Component "${e}" has already been registered in target app.`),o.components[e]=t,c):o.components[e]),directive:(e,t)=>("production"!==process.env.NODE_ENV&&validateDirectiveName(e),t?("production"!==process.env.NODE_ENV&&o.directives[e]&&warn$1(`Directive "${e}" has already been registered in target app.`),o.directives[e]=t,c):o.directives[e]),mount(r,a,i){if(!s){"production"!==process.env.NODE_ENV&&r.__vue_app__&&warn$1("There is already an app instance mounted on the host container.\n If you want to mount another app on the same host container, you need to unmount the previous app by calling `app.unmount()` first.");const a=c._ceVNode||it(t,n);return a.appContext=o,!0===i?i="svg":!1===i&&(i=void 0),"production"!==process.env.NODE_ENV&&(o.reload=()=>{const t=cloneVNode(a);t.el=null,e(t,r,i)}),e(a,r,i),s=!0,c._container=r,r.__vue_app__=c,"production"!==process.env.NODE_ENV&&(c._instance=a.component,function(e,t){emit$1("app:init",e,t,{Fragment:et,Text:tt,Comment:nt,Static:ot})}(c,gt)),getComponentPublicInstance(a.component)}"production"!==process.env.NODE_ENV&&warn$1("App has already been mounted.\nIf you want to remount the same app, move your app creation logic into a factory function and create fresh app instances for each mount - e.g. `const createMyApp = () => createApp(App)`")},onUnmount(e){"production"!==process.env.NODE_ENV&&"function"!=typeof e&&warn$1("Expected function as first argument to app.onUnmount(), but got "+typeof e),a.push(e)},unmount(){s?(callWithAsyncErrorHandling(a,c._instance,16),e(null,c._container),"production"!==process.env.NODE_ENV&&(c._instance=null,function(e){emit$1("app:unmount",e)}(c)),delete c._container.__vue_app__):"production"!==process.env.NODE_ENV&&warn$1("Cannot unmount an app that is not mounted.")},provide:(e,t)=>("production"!==process.env.NODE_ENV&&e in o.provides&&(hasOwn(o.provides,e)?warn$1(`App already provides property with key "${String(e)}". It will be overwritten with the new value.`):warn$1(`App already provides property with key "${String(e)}" inherited from its parent element. It will be overwritten with the new value.`)),o.provides[e]=t,c),runWithContext(e){const t=Ue;Ue=c;try{return e()}finally{Ue=t}}};return c}}let Ue=null;function inject(e,t,n=!1){const o=getCurrentInstance();if(o||Ue){let r=Ue?Ue._context.provides:o?null==o.parent||o.ce?o.vnode.appContext&&o.vnode.appContext.provides:o.parent.provides:void 0;if(r&&e in r)return r[e];if(arguments.length>1)return n&&isFunction(t)?t.call(o&&o.proxy):t;"production"!==process.env.NODE_ENV&&warn$1(`injection "${String(e)}" not found.`)}else"production"!==process.env.NODE_ENV&&warn$1("inject() can only be used inside setup() or functional components.")}const Ge={},createInternalObject=()=>Object.create(Ge),isInternalObject=e=>Object.getPrototypeOf(e)===Ge;function initProps(e,t,n,o=!1){const r={},a=createInternalObject();e.propsDefaults=Object.create(null),setFullProps(e,t,r,a);for(const s in e.propsOptions[0])s in r||(r[s]=void 0);"production"!==process.env.NODE_ENV&&validateProps(t||{},r,e),n?e.props=o?r:createReactiveObject(r,!1,U,J,X):e.type.props?e.props=r:e.props=a,e.attrs=a}function setFullProps(e,t,n,o){const[r,s]=e.propsOptions;let i,c=!1;if(t)for(let a in t){if(p(a))continue;const l=t[a];let d;r&&hasOwn(r,d=v(a))?s&&s.includes(d)?(i||(i={}))[d]=l:n[d]=l:isEmitListener(e.emitsOptions,a)||a in o&&l===o[a]||(o[a]=l,c=!0)}if(s){const t=toRaw(n),o=i||a;for(let a=0;a<s.length;a++){const i=s[a];n[i]=resolvePropValue(r,t,i,o[i],e,!hasOwn(o,i))}}return c}function resolvePropValue(e,t,n,o,r,a){const s=e[n];if(null!=s){const e=hasOwn(s,"default");if(e&&void 0===o){const e=s.default;if(s.type!==Function&&!s.skipFactory&&isFunction(e)){const{propsDefaults:a}=r;if(n in a)o=a[n];else{const s=setCurrentInstance(r);o=a[n]=e.call(null,t),s()}}else o=e;r.ce&&r.ce._setProp(n,o)}s[0]&&(a&&!e?o=!1:!s[1]||""!==o&&o!==m(n)||(o=!0))}return o}const Ke=new WeakMap;function normalizePropsOptions(e,t,n=!1){const o=n?Ke:t.propsCache,r=o.get(e);if(r)return r;const c=e.props,d={},p=[];let u=!1;if(!isFunction(e)){const extendProps=e=>{u=!0;const[n,o]=normalizePropsOptions(e,t,!0);i(d,n),o&&p.push(...o)};!n&&t.mixins.length&&t.mixins.forEach(extendProps),e.extends&&extendProps(e.extends),e.mixins&&e.mixins.forEach(extendProps)}if(!c&&!u)return isObject(e)&&o.set(e,s),s;if(l(c))for(let s=0;s<c.length;s++){"production"===process.env.NODE_ENV||isString(c[s])||warn$1("props must be strings when using array syntax.",c[s]);const e=v(c[s]);validatePropName(e)&&(d[e]=a)}else if(c){"production"===process.env.NODE_ENV||isObject(c)||warn$1("invalid props options",c);for(const e in c){const t=v(e);if(validatePropName(t)){const n=c[e],o=d[t]=l(n)||isFunction(n)?{type:n}:i({},n),r=o.type;let a=!1,s=!0;if(l(r))for(let e=0;e<r.length;++e){const t=r[e],n=isFunction(t)&&t.name;if("Boolean"===n){a=!0;break}"String"===n&&(s=!1)}else a=isFunction(r)&&"Boolean"===r.name;o[0]=a,o[1]=s,(a||hasOwn(o,"default"))&&p.push(t)}}}const f=[d,p];return isObject(e)&&o.set(e,f),f}function validatePropName(e){return"$"!==e[0]&&!p(e)||("production"!==process.env.NODE_ENV&&warn$1(`Invalid prop name: "${e}" is a reserved property.`),!1)}function validateProps(e,t,n){const o=toRaw(t),r=n.propsOptions[0],a=Object.keys(e).map(e=>v(e));for(const s in r){let e=r[s];null!=e&&validateProp(s,o[s],e,"production"!==process.env.NODE_ENV?shallowReadonly(o):o,!a.includes(s))}}function validateProp(e,t,n,o,r){const{type:a,required:s,validator:i,skipCheck:c}=n;if(s&&r)warn$1('Missing required prop: "'+e+'"');else if(null!=t||s){if(null!=a&&!0!==a&&!c){let n=!1;const o=l(a)?a:[a],r=[];for(let e=0;e<o.length&&!n;e++){const{valid:a,expectedType:s}=assertType(t,o[e]);r.push(s||""),n=a}if(!n)return void warn$1(function(e,t,n){if(0===n.length)return`Prop type [] for prop "${e}" won't match anything. Did you mean to use type Array instead?`;let o=`Invalid prop: type check failed for prop "${e}". Expected ${n.map(g).join(" | ")}`;const r=n[0],a=toRawType(t),s=styleValue(t,r),i=styleValue(t,a);1===n.length&&isExplicable(r)&&!function(...e){return e.some(e=>"boolean"===e.toLowerCase())}(r,a)&&(o+=` with value ${s}`);o+=`, got ${a} `,isExplicable(a)&&(o+=`with value ${i}.`);return o}(e,t,r))}i&&!i(t,o)&&warn$1('Invalid prop: custom validator check failed for prop "'+e+'".')}}const Je=makeMap("String,Number,Boolean,Function,Symbol,BigInt");function assertType(e,t){let n;const o=function(e){if(null===e)return"null";if("function"==typeof e)return e.name||"";if("object"==typeof e)return e.constructor&&e.constructor.name||"";return""}(t);if("null"===o)n=null===e;else if(Je(o)){const r=typeof e;n=r===o.toLowerCase(),n||"object"!==r||(n=e instanceof t)}else n="Object"===o?isObject(e):"Array"===o?l(e):e instanceof t;return{valid:n,expectedType:o}}function styleValue(e,t){return"String"===t?`"${e}"`:"Number"===t?`${Number(e)}`:`${e}`}function isExplicable(e){return["string","number","boolean"].some(t=>e.toLowerCase()===t)}const isInternalKey=e=>"_"===e||"__"===e||"_ctx"===e||"$stable"===e,normalizeSlotValue=e=>l(e)?e.map(normalizeVNode):[normalizeVNode(e)],normalizeSlot=(e,t,n)=>{if(t._n)return t;const o=function(e,t=Oe){if(!t)return e;if(e._n)return e;const renderFnWithContext=(...n)=>{renderFnWithContext._d&&setBlockTracking(-1);const o=setCurrentRenderingInstance(t);let r;try{r=e(...n)}finally{setCurrentRenderingInstance(o),renderFnWithContext._d&&setBlockTracking(1)}return"production"!==process.env.NODE_ENV&&Ee(t),r};return renderFnWithContext._n=!0,renderFnWithContext._c=!0,renderFnWithContext._d=!0,renderFnWithContext}((...o)=>("production"===process.env.NODE_ENV||!dt||null===n&&Oe||n&&n.root!==dt.root||warn$1(`Slot "${e}" invoked outside of the render function: this will not track dependencies used in the slot. Invoke the slot function inside the render function instead.`),normalizeSlotValue(t(...o))),n);return o._c=!1,o},normalizeObjectSlots=(e,t,n)=>{const o=e._ctx;for(const r in e){if(isInternalKey(r))continue;const n=e[r];if(isFunction(n))t[r]=normalizeSlot(r,n,o);else if(null!=n){"production"!==process.env.NODE_ENV&&warn$1(`Non-function value encountered for slot "${r}". Prefer function slots for better performance.`);const e=normalizeSlotValue(n);t[r]=()=>e}}},normalizeVNodeSlots=(e,t)=>{"production"===process.env.NODE_ENV||isKeepAlive(e.vnode)||warn$1("Non-function value encountered for default slot. Prefer function slots for better performance.");const n=normalizeSlotValue(t);e.slots.default=()=>n},assignSlots=(e,t,n)=>{for(const o in t)!n&&isInternalKey(o)||(e[o]=t[o])};let Ze,Ye;function startMeasure(e,t){e.appContext.config.performance&&isSupported()&&Ye.mark(`vue-${t}-${e.uid}`),"production"!==process.env.NODE_ENV&&xe(e,t,isSupported()?Ye.now():Date.now())}function endMeasure(e,t){if(e.appContext.config.performance&&isSupported()){const n=`vue-${t}-${e.uid}`,o=n+":end";Ye.mark(o),Ye.measure(`<${formatComponentName(e,e.type)}> ${t}`,n,o),Ye.clearMarks(n),Ye.clearMarks(o)}"production"!==process.env.NODE_ENV&&Ve(e,t,isSupported()?Ye.now():Date.now())}function isSupported(){return void 0!==Ze||("undefined"!=typeof window&&window.performance?(Ze=!0,Ye=window.performance):Ze=!1),Ze}const queuePostRenderEffect=function(e,t){t&&t.pendingBranch?l(e)?t.effects.push(...e):t.effects.push(e):queuePostFlushCb(e)};function createRenderer(e){return function(e){!function(){const e=[];if("production"!==process.env.NODE_ENV&&e.length){const t=e.length>1;console.warn(`Feature flag${t?"s":""} ${e.join(", ")} ${t?"are":"is"} not explicitly defined. You are running the esm-bundler build of Vue, which expects these compile-time feature flags to be globally injected via the bundler config in order to get better tree-shaking in the production bundle.\n\nFor more details, see https://link.vuejs.org/feature-flags.`)}}();const t=getGlobalThis();t.__VUE__=!0,"production"===process.env.NODE_ENV||setDevtoolsHook$1(t.__VUE_DEVTOOLS_GLOBAL_HOOK__,t);const{insert:n,remove:o,patchProp:r,createElement:i,createText:c,createComment:d,setText:u,setElementText:f,parentNode:h,nextSibling:g,setScopeId:b=NOOP,insertStaticContent:y}=e,patch=(e,t,n,o=null,r=null,a=null,s=void 0,i=null,c=("production"===process.env.NODE_ENV||!me)&&!!t.dynamicChildren)=>{if(e===t)return;e&&!isSameVNodeType(e,t)&&(o=getNextHostNode(e),unmount(e,r,a,!0),e=null),-2===t.patchFlag&&(c=!1,t.dynamicChildren=null);const{type:l,ref:d,shapeFlag:p}=t;switch(l){case tt:processText(e,t,n,o);break;case nt:processCommentNode(e,t,n,o);break;case ot:null==e?mountStaticNode(t,n,o,s):"production"!==process.env.NODE_ENV&&patchStaticNode(e,t,n,s);break;case et:processFragment(e,t,n,o,r,a,s,i,c);break;default:1&p?processElement(e,t,n,o,r,a,s,i,c):6&p?processComponent(e,t,n,o,r,a,s,i,c):64&p||128&p?l.process(e,t,n,o,r,a,s,i,c,N):"production"!==process.env.NODE_ENV&&warn$1("Invalid VNode type:",l,`(${typeof l})`)}null!=d&&r?setRef(d,e&&e.ref,a,t||e,!t):null==d&&e&&null!=e.ref&&setRef(e.ref,null,a,e,!0)},processText=(e,t,o,r)=>{if(null==e)n(t.el=c(t.children),o,r);else{const n=t.el=e.el;t.children!==e.children&&u(n,t.children)}},processCommentNode=(e,t,o,r)=>{null==e?n(t.el=d(t.children||""),o,r):t.el=e.el},mountStaticNode=(e,t,n,o)=>{[e.el,e.anchor]=y(e.children,t,n,o,e.el,e.anchor)},patchStaticNode=(e,t,n,o)=>{if(t.children!==e.children){const r=g(e.anchor);removeStaticNode(e),[t.el,t.anchor]=y(t.children,n,r,o)}else t.el=e.el,t.anchor=e.anchor},moveStaticNode=({el:e,anchor:t},o,r)=>{let a;for(;e&&e!==t;)a=g(e),n(e,o,r),e=a;n(t,o,r)},removeStaticNode=({el:e,anchor:t})=>{let n;for(;e&&e!==t;)n=g(e),o(e),e=n;o(t)},processElement=(e,t,n,o,r,a,s,i,c)=>{"svg"===t.type?s="svg":"math"===t.type&&(s="mathml"),null==e?mountElement(t,n,o,r,a,s,i,c):patchElement(e,t,r,a,s,i,c)},mountElement=(e,t,o,a,s,c,l,d)=>{let u,v;const{props:h,shapeFlag:m,transition:g,dirs:b}=e;if(u=e.el=i(e.type,c,h&&h.is,h),8&m?f(u,e.children):16&m&&mountChildren(e.children,u,null,a,s,resolveChildrenNamespace(e,c),l,d),b&&invokeDirectiveHook(e,null,a,"created"),setScopeId(u,e,e.scopeId,l,a),h){for(const e in h)"value"===e||p(e)||r(u,e,null,h[e],c,a);"value"in h&&r(u,"value",null,h.value,c),(v=h.onVnodeBeforeMount)&&invokeVNodeHook(v,a,e)}"production"!==process.env.NODE_ENV&&(def(u,"__vnode",e,!0),def(u,"__vueParentComponent",a,!0)),b&&invokeDirectiveHook(e,null,a,"beforeMount");const y=function(e,t){return(!e||e&&!e.pendingBranch)&&t&&!t.persisted}(s,g);y&&g.beforeEnter(u),n(u,t,o),((v=h&&h.onVnodeMounted)||y||b)&&queuePostRenderEffect(()=>{v&&invokeVNodeHook(v,a,e),y&&g.enter(u),b&&invokeDirectiveHook(e,null,a,"mounted")},s)},setScopeId=(e,t,n,o,r)=>{if(n&&b(e,n),o)for(let a=0;a<o.length;a++)b(e,o[a]);if(r){let n=r.subTree;if("production"!==process.env.NODE_ENV&&n.patchFlag>0&&2048&n.patchFlag&&(n=filterSingleRoot(n.children)||n),t===n||isSuspense(n.type)&&(n.ssContent===t||n.ssFallback===t)){const t=r.vnode;setScopeId(e,t,t.scopeId,t.slotScopeIds,r.parent)}}},mountChildren=(e,t,n,o,r,a,s,i,c=0)=>{for(let l=c;l<e.length;l++){const c=e[l]=i?cloneIfMounted(e[l]):normalizeVNode(e[l]);patch(null,c,t,n,o,r,a,s,i)}},patchElement=(e,t,n,o,s,i,c)=>{const l=t.el=e.el;"production"!==process.env.NODE_ENV&&(l.__vnode=t);let{patchFlag:d,dynamicChildren:p,dirs:u}=t;d|=16&e.patchFlag;const v=e.props||a,h=t.props||a;let m;if(n&&toggleRecurse(n,!1),(m=h.onVnodeBeforeUpdate)&&invokeVNodeHook(m,n,t,e),u&&invokeDirectiveHook(t,e,n,"beforeUpdate"),n&&toggleRecurse(n,!0),"production"!==process.env.NODE_ENV&&me&&(d=0,c=!1,p=null),(v.innerHTML&&null==h.innerHTML||v.textContent&&null==h.textContent)&&f(l,""),p?(patchBlockChildren(e.dynamicChildren,p,l,n,o,resolveChildrenNamespace(t,s),i),"production"!==process.env.NODE_ENV&&traverseStaticChildren(e,t)):c||patchChildren(e,t,l,null,n,o,resolveChildrenNamespace(t,s),i,!1),d>0){if(16&d)patchProps(l,v,h,n,s);else if(2&d&&v.class!==h.class&&r(l,"class",null,h.class,s),4&d&&r(l,"style",v.style,h.style,s),8&d){const e=t.dynamicProps;for(let t=0;t<e.length;t++){const o=e[t],a=v[o],i=h[o];i===a&&"value"!==o||r(l,o,a,i,s,n)}}1&d&&e.children!==t.children&&f(l,t.children)}else c||null!=p||patchProps(l,v,h,n,s);((m=h.onVnodeUpdated)||u)&&queuePostRenderEffect(()=>{m&&invokeVNodeHook(m,n,t,e),u&&invokeDirectiveHook(t,e,n,"updated")},o)},patchBlockChildren=(e,t,n,o,r,a,s)=>{for(let i=0;i<t.length;i++){const c=e[i],l=t[i],d=c.el&&(c.type===et||!isSameVNodeType(c,l)||198&c.shapeFlag)?h(c.el):n;patch(c,l,d,null,o,r,a,s,!0)}},patchProps=(e,t,n,o,s)=>{if(t!==n){if(t!==a)for(const a in t)p(a)||a in n||r(e,a,t[a],null,s,o);for(const a in n){if(p(a))continue;const i=n[a],c=t[a];i!==c&&"value"!==a&&r(e,a,c,i,s,o)}"value"in n&&r(e,"value",t.value,n.value,s)}},processFragment=(e,t,o,r,a,s,i,l,d)=>{const p=t.el=e?e.el:c(""),u=t.anchor=e?e.anchor:c("");let{patchFlag:f,dynamicChildren:v,slotScopeIds:h}=t;"production"!==process.env.NODE_ENV&&(me||2048&f)&&(f=0,d=!1,v=null),h&&(l=l?l.concat(h):h),null==e?(n(p,o,r),n(u,o,r),mountChildren(t.children||[],o,u,a,s,i,l,d)):f>0&&64&f&&v&&e.dynamicChildren?(patchBlockChildren(e.dynamicChildren,v,o,a,s,i,l),"production"!==process.env.NODE_ENV?traverseStaticChildren(e,t):(null!=t.key||a&&t===a.subTree)&&traverseStaticChildren(e,t,!0)):patchChildren(e,t,o,u,a,s,i,l,d)},processComponent=(e,t,n,o,r,a,s,i,c)=>{t.slotScopeIds=i,null==e?512&t.shapeFlag?r.ctx.activate(t,n,o,s,c):mountComponent(t,n,o,r,a,s,c):updateComponent(e,t,c)},mountComponent=(e,t,n,o,r,s,i)=>{const c=e.component=function(e,t,n){const o=e.type,r=(t?t.appContext:e.appContext)||ct,s={uid:lt++,vnode:e,type:o,parent:t,appContext:r,root:null,next:null,subTree:null,effect:null,update:null,job:null,scope:new EffectScope(!0),render:null,proxy:null,exposed:null,exposeProxy:null,withProxy:null,provides:t?t.provides:Object.create(r.provides),ids:t?t.ids:["",0,0],accessCache:null,renderCache:[],components:null,directives:null,propsOptions:normalizePropsOptions(o,r),emitsOptions:normalizeEmitsOptions(o,r),emit:null,emitted:null,propsDefaults:a,inheritAttrs:o.inheritAttrs,ctx:a,data:a,props:a,attrs:a,slots:a,refs:a,setupState:a,setupContext:null,suspense:n,suspenseId:n?n.pendingId:0,asyncDep:null,asyncResolved:!1,isMounted:!1,isUnmounted:!1,isDeactivated:!1,bc:null,c:null,bm:null,m:null,bu:null,u:null,um:null,bum:null,da:null,a:null,rtg:null,rtc:null,ec:null,sp:null};"production"!==process.env.NODE_ENV?s.ctx=function(e){const t={};return Object.defineProperty(t,"_",{configurable:!0,enumerable:!1,get:()=>e}),Object.keys(He).forEach(n=>{Object.defineProperty(t,n,{configurable:!0,enumerable:!1,get:()=>He[n](e),set:NOOP})}),t}(s):s.ctx={_:s};s.root=t?t.root:s,s.emit=emit.bind(null,s),e.ce&&e.ce(s);return s}(e,o,r);if("production"!==process.env.NODE_ENV&&c.type.__hmrId&&function(e){const t=e.type.__hmrId;let n=be.get(t);n||(createRecord(t,e.type),n=be.get(t)),n.instances.add(e)}(c),"production"!==process.env.NODE_ENV&&(pushWarningContext(e),startMeasure(c,"mount")),isKeepAlive(e)&&(c.ctx.renderer=N),"production"!==process.env.NODE_ENV&&startMeasure(c,"init"),function(e,t=!1,n=!1){t&&ut(t);const{props:o,children:r}=e.vnode,a=isStatefulComponent(e);initProps(e,o,a,t),((e,t,n)=>{const o=e.slots=createInternalObject();if(32&e.vnode.shapeFlag){const e=t.__;e&&def(o,"__",e,!0);const r=t._;r?(assignSlots(o,t,n),n&&def(o,"_",r,!0)):normalizeObjectSlots(t,o)}else t&&normalizeVNodeSlots(e,t)})(e,r,n||t);const s=a?function(e,t){var n;const o=e.type;if("production"!==process.env.NODE_ENV){if(o.name&&validateComponentName(o.name,e.appContext.config),o.components){const t=Object.keys(o.components);for(let n=0;n<t.length;n++)validateComponentName(t[n],e.appContext.config)}if(o.directives){const e=Object.keys(o.directives);for(let t=0;t<e.length;t++)validateDirectiveName(e[t])}o.compilerOptions&&isRuntimeOnly()&&warn$1('"compilerOptions" is only supported when using a build of Vue that includes the runtime compiler. Since you are using a runtime-only build, the options should be passed via your build tool config instead.')}e.accessCache=Object.create(null),e.proxy=new Proxy(e.ctx,Fe),"production"===process.env.NODE_ENV||function(e){const{ctx:t,propsOptions:[n]}=e;n&&Object.keys(n).forEach(n=>{Object.defineProperty(t,n,{enumerable:!0,configurable:!0,get:()=>e.props[n],set:NOOP})})}(e);const{setup:r}=o;if(r){pauseTracking();const a=e.setupContext=r.length>1?function(e){const expose=t=>{if("production"!==process.env.NODE_ENV&&(e.exposed&&warn$1("expose() should be called only once per setup()."),null!=t)){let e=typeof t;"object"===e&&(l(t)?e="array":isRef(t)&&(e="ref")),"object"!==e&&warn$1(`expose() should be passed a plain object, received ${e}.`)}e.exposed=t||{}};if("production"!==process.env.NODE_ENV){let t,n;return Object.freeze({get attrs(){return t||(t=new Proxy(e.attrs,ht))},get slots(){return n||(n=function(e){return new Proxy(e.slots,{get:(t,n)=>(track(e,"get","$slots"),t[n])})}(e))},get emit(){return(t,...n)=>e.emit(t,...n)},expose:expose})}return{attrs:new Proxy(e.attrs,ht),slots:e.slots,emit:e.emit,expose:expose}}(e):null,s=setCurrentInstance(e),i=callWithErrorHandling(r,e,0,["production"!==process.env.NODE_ENV?shallowReadonly(e.props):e.props,a]),c=isPromise(i);if(resetTracking(),s(),!c&&!e.sp||isAsyncWrapper(e)||markAsyncBoundary(e),c){if(i.then(unsetCurrentInstance,unsetCurrentInstance),t)return i.then(n=>{handleSetupResult(e,n,t)}).catch(t=>{handleError(t,e,0)});if(e.asyncDep=i,"production"!==process.env.NODE_ENV&&!e.suspense){warn$1(`Component <${null!=(n=o.name)?n:"Anonymous"}>: setup function returned a promise, but no <Suspense> boundary was found in the parent component tree. A component with async setup() must be nested in a <Suspense> in order to be rendered.`)}}else handleSetupResult(e,i,t)}else finishComponentSetup(e,t)}(e,t):void 0;t&&ut(!1)}(c,!1,i),"production"!==process.env.NODE_ENV&&endMeasure(c,"init"),"production"!==process.env.NODE_ENV&&me&&(e.el=null),c.asyncDep){if(r&&r.registerDep(c,setupRenderEffect,i),!e.el){const o=c.subTree=it(nt);processCommentNode(null,o,t,n),e.placeholder=o.el}}else setupRenderEffect(c,e,t,n,r,s,i);"production"!==process.env.NODE_ENV&&(popWarningContext(),endMeasure(c,"mount"))},updateComponent=(e,t,n)=>{const o=t.component=e.component;if(function(e,t,n){const{props:o,children:r,component:a}=e,{props:s,children:i,patchFlag:c}=t,l=a.emitsOptions;if("production"!==process.env.NODE_ENV&&(r||i)&&me)return!0;if(t.dirs||t.transition)return!0;if(!(n&&c>=0))return!(!r&&!i||i&&i.$stable)||o!==s&&(o?!s||hasPropsChanged(o,s,l):!!s);if(1024&c)return!0;if(16&c)return o?hasPropsChanged(o,s,l):!!s;if(8&c){const e=t.dynamicProps;for(let t=0;t<e.length;t++){const n=e[t];if(s[n]!==o[n]&&!isEmitListener(l,n))return!0}}return!1}(e,t,n)){if(o.asyncDep&&!o.asyncResolved)return"production"!==process.env.NODE_ENV&&pushWarningContext(t),updateComponentPreRender(o,t,n),void("production"!==process.env.NODE_ENV&&popWarningContext());o.next=t,o.update()}else t.el=e.el,o.vnode=t},setupRenderEffect=(e,t,n,o,r,a,s)=>{const componentUpdateFn=()=>{if(e.isMounted){let{next:t,bu:n,u:o,parent:i,vnode:c}=e;{const n=locateNonHydratedAsyncRoot(e);if(n)return t&&(t.el=c.el,updateComponentPreRender(e,t,s)),void n.asyncDep.then(()=>{e.isUnmounted||componentUpdateFn()})}let l,d=t;"production"!==process.env.NODE_ENV&&pushWarningContext(t||e.vnode),toggleRecurse(e,!1),t?(t.el=c.el,updateComponentPreRender(e,t,s)):t=c,n&&invokeArrayFns(n),(l=t.props&&t.props.onVnodeBeforeUpdate)&&invokeVNodeHook(l,i,t,c),toggleRecurse(e,!0),"production"!==process.env.NODE_ENV&&startMeasure(e,"render");const p=renderComponentRoot(e);"production"!==process.env.NODE_ENV&&endMeasure(e,"render");const u=e.subTree;e.subTree=p,"production"!==process.env.NODE_ENV&&startMeasure(e,"patch"),patch(u,p,h(u.el),getNextHostNode(u),e,r,a),"production"!==process.env.NODE_ENV&&endMeasure(e,"patch"),t.el=p.el,null===d&&function({vnode:e,parent:t},n){for(;t;){const o=t.subTree;if(o.suspense&&o.suspense.activeBranch===e&&(o.el=e.el),o!==e)break;(e=t.vnode).el=n,t=t.parent}}(e,p.el),o&&queuePostRenderEffect(o,r),(l=t.props&&t.props.onVnodeUpdated)&&queuePostRenderEffect(()=>invokeVNodeHook(l,i,t,c),r),"production"!==process.env.NODE_ENV&&Ee(e),"production"!==process.env.NODE_ENV&&popWarningContext()}else{let s;const{el:i,props:c}=t,{bm:l,m:d,parent:p,root:u,type:f}=e,v=isAsyncWrapper(t);toggleRecurse(e,!1),l&&invokeArrayFns(l),!v&&(s=c&&c.onVnodeBeforeMount)&&invokeVNodeHook(s,p,t),toggleRecurse(e,!0);{u.ce&&!1!==u.ce._def.shadowRoot&&u.ce._injectChildStyle(f),"production"!==process.env.NODE_ENV&&startMeasure(e,"render");const s=e.subTree=renderComponentRoot(e);"production"!==process.env.NODE_ENV&&endMeasure(e,"render"),"production"!==process.env.NODE_ENV&&startMeasure(e,"patch"),patch(null,s,n,o,e,r,a),"production"!==process.env.NODE_ENV&&endMeasure(e,"patch"),t.el=s.el}if(d&&queuePostRenderEffect(d,r),!v&&(s=c&&c.onVnodeMounted)){const e=t;queuePostRenderEffect(()=>invokeVNodeHook(s,p,e),r)}(256&t.shapeFlag||p&&isAsyncWrapper(p.vnode)&&256&p.vnode.shapeFlag)&&e.a&&queuePostRenderEffect(e.a,r),e.isMounted=!0,"production"!==process.env.NODE_ENV&&we(e),t=n=o=null}};e.scope.on();const i=e.effect=new ReactiveEffect(componentUpdateFn);e.scope.off();const c=e.update=i.run.bind(i),l=e.job=i.runIfDirty.bind(i);l.i=e,l.id=e.uid,i.scheduler=()=>queueJob(l),toggleRecurse(e,!0),"production"!==process.env.NODE_ENV&&(i.onTrack=e.rtc?t=>invokeArrayFns(e.rtc,t):void 0,i.onTrigger=e.rtg?t=>invokeArrayFns(e.rtg,t):void 0),c()},updateComponentPreRender=(e,t,n)=>{t.component=e;const o=e.vnode.props;e.vnode=t,e.next=null,function(e,t,n,o){const{props:r,attrs:a,vnode:{patchFlag:s}}=e,i=toRaw(r),[c]=e.propsOptions;let l=!1;if("production"!==process.env.NODE_ENV&&function(e){for(;e;){if(e.type.__hmrId)return!0;e=e.parent}}(e)||!(o||s>0)||16&s){let o;setFullProps(e,t,r,a)&&(l=!0);for(const a in i)t&&(hasOwn(t,a)||(o=m(a))!==a&&hasOwn(t,o))||(c?!n||void 0===n[a]&&void 0===n[o]||(r[a]=resolvePropValue(c,i,a,void 0,e,!0)):delete r[a]);if(a!==i)for(const e in a)t&&hasOwn(t,e)||(delete a[e],l=!0)}else if(8&s){const n=e.vnode.dynamicProps;for(let o=0;o<n.length;o++){let s=n[o];if(isEmitListener(e.emitsOptions,s))continue;const d=t[s];if(c)if(hasOwn(a,s))d!==a[s]&&(a[s]=d,l=!0);else{const t=v(s);r[t]=resolvePropValue(c,i,t,d,e,!1)}else d!==a[s]&&(a[s]=d,l=!0)}}l&&trigger(e.attrs,"set",""),"production"!==process.env.NODE_ENV&&validateProps(t||{},r,e)}(e,t.props,o,n),((e,t,n)=>{const{vnode:o,slots:r}=e;let s=!0,i=a;if(32&o.shapeFlag){const o=t._;o?"production"!==process.env.NODE_ENV&&me?(assignSlots(r,t,n),trigger(e,"set","$slots")):n&&1===o?s=!1:assignSlots(r,t,n):(s=!t.$stable,normalizeObjectSlots(t,r)),i=t}else t&&(normalizeVNodeSlots(e,t),i={default:1});if(s)for(const a in r)isInternalKey(a)||null!=i[a]||delete r[a]})(e,t.children,n),pauseTracking(),flushPreFlushCbs(e),resetTracking()},patchChildren=(e,t,n,o,r,a,s,i,c=!1)=>{const l=e&&e.children,d=e?e.shapeFlag:0,p=t.children,{patchFlag:u,shapeFlag:v}=t;if(u>0){if(128&u)return void patchKeyedChildren(l,p,n,o,r,a,s,i,c);if(256&u)return void patchUnkeyedChildren(l,p,n,o,r,a,s,i,c)}8&v?(16&d&&unmountChildren(l,r,a),p!==l&&f(n,p)):16&d?16&v?patchKeyedChildren(l,p,n,o,r,a,s,i,c):unmountChildren(l,r,a,!0):(8&d&&f(n,""),16&v&&mountChildren(p,n,o,r,a,s,i,c))},patchUnkeyedChildren=(e,t,n,o,r,a,i,c,l)=>{t=t||s;const d=(e=e||s).length,p=t.length,u=Math.min(d,p);let f;for(f=0;f<u;f++){const o=t[f]=l?cloneIfMounted(t[f]):normalizeVNode(t[f]);patch(e[f],o,n,null,r,a,i,c,l)}d>p?unmountChildren(e,r,a,!0,!1,u):mountChildren(t,n,o,r,a,i,c,l,u)},patchKeyedChildren=(e,t,n,o,r,a,i,c,l)=>{let d=0;const p=t.length;let u=e.length-1,f=p-1;for(;d<=u&&d<=f;){const o=e[d],s=t[d]=l?cloneIfMounted(t[d]):normalizeVNode(t[d]);if(!isSameVNodeType(o,s))break;patch(o,s,n,null,r,a,i,c,l),d++}for(;d<=u&&d<=f;){const o=e[u],s=t[f]=l?cloneIfMounted(t[f]):normalizeVNode(t[f]);if(!isSameVNodeType(o,s))break;patch(o,s,n,null,r,a,i,c,l),u--,f--}if(d>u){if(d<=f){const e=f+1,s=e<p?t[e].el:o;for(;d<=f;)patch(null,t[d]=l?cloneIfMounted(t[d]):normalizeVNode(t[d]),n,s,r,a,i,c,l),d++}}else if(d>f)for(;d<=u;)unmount(e[d],r,a,!0),d++;else{const v=d,h=d,m=new Map;for(d=h;d<=f;d++){const e=t[d]=l?cloneIfMounted(t[d]):normalizeVNode(t[d]);null!=e.key&&("production"!==process.env.NODE_ENV&&m.has(e.key)&&warn$1("Duplicate keys found during update:",JSON.stringify(e.key),"Make sure keys are unique."),m.set(e.key,d))}let g,b=0;const y=f-h+1;let _=!1,N=0;const w=new Array(y);for(d=0;d<y;d++)w[d]=0;for(d=v;d<=u;d++){const o=e[d];if(b>=y){unmount(o,r,a,!0);continue}let s;if(null!=o.key)s=m.get(o.key);else for(g=h;g<=f;g++)if(0===w[g-h]&&isSameVNodeType(o,t[g])){s=g;break}void 0===s?unmount(o,r,a,!0):(w[s-h]=d+1,s>=N?N=s:_=!0,patch(o,t[s],n,null,r,a,i,c,l),b++)}const E=_?function(e){const t=e.slice(),n=[0];let o,r,a,s,i;const c=e.length;for(o=0;o<c;o++){const c=e[o];if(0!==c){if(r=n[n.length-1],e[r]<c){t[o]=r,n.push(o);continue}for(a=0,s=n.length-1;a<s;)i=a+s>>1,e[n[i]]<c?a=i+1:s=i;c<e[n[a]]&&(a>0&&(t[o]=n[a-1]),n[a]=o)}}a=n.length,s=n[a-1];for(;a-- >0;)n[a]=s,s=t[s];return n}(w):s;for(g=E.length-1,d=y-1;d>=0;d--){const e=h+d,s=t[e],u=t[e+1],f=e+1<p?u.el||u.placeholder:o;0===w[d]?patch(null,s,n,f,r,a,i,c,l):_&&(g<0||d!==E[g]?move(s,n,f,2):g--)}}},move=(e,t,r,a,s=null)=>{const{el:i,type:c,transition:l,children:d,shapeFlag:p}=e;if(6&p)return void move(e.component.subTree,t,r,a);if(128&p)return void e.suspense.move(t,r,a);if(64&p)return void c.move(e,t,r,N);if(c===et){n(i,t,r);for(let e=0;e<d.length;e++)move(d[e],t,r,a);return void n(e.anchor,t,r)}if(c===ot)return void moveStaticNode(e,t,r);if(2!==a&&1&p&&l)if(0===a)l.beforeEnter(i),n(i,t,r),queuePostRenderEffect(()=>l.enter(i),s);else{const{leave:a,delayLeave:s,afterLeave:c}=l,remove22=()=>{e.ctx.isUnmounted?o(i):n(i,t,r)},performLeave=()=>{a(i,()=>{remove22(),c&&c()})};s?s(i,remove22,performLeave):performLeave()}else n(i,t,r)},unmount=(e,t,n,o=!1,r=!1)=>{const{type:a,props:s,ref:i,children:c,dynamicChildren:l,shapeFlag:d,patchFlag:p,dirs:u,cacheIndex:f}=e;if(-2===p&&(r=!1),null!=i&&(pauseTracking(),setRef(i,null,n,e,!0),resetTracking()),null!=f&&(t.renderCache[f]=void 0),256&d)return void t.ctx.deactivate(e);const v=1&d&&u,h=!isAsyncWrapper(e);let m;if(h&&(m=s&&s.onVnodeBeforeUnmount)&&invokeVNodeHook(m,t,e),6&d)unmountComponent(e.component,n,o);else{if(128&d)return void e.suspense.unmount(n,o);v&&invokeDirectiveHook(e,null,t,"beforeUnmount"),64&d?e.type.remove(e,t,n,N,o):l&&!l.hasOnce&&(a!==et||p>0&&64&p)?unmountChildren(l,t,n,!1,!0):(a===et&&384&p||!r&&16&d)&&unmountChildren(c,t,n),o&&remove2(e)}(h&&(m=s&&s.onVnodeUnmounted)||v)&&queuePostRenderEffect(()=>{m&&invokeVNodeHook(m,t,e),v&&invokeDirectiveHook(e,null,t,"unmounted")},n)},remove2=e=>{const{type:t,el:n,anchor:r,transition:a}=e;if(t===et)return void("production"!==process.env.NODE_ENV&&e.patchFlag>0&&2048&e.patchFlag&&a&&!a.persisted?e.children.forEach(e=>{e.type===nt?o(e.el):remove2(e)}):removeFragment(n,r));if(t===ot)return void removeStaticNode(e);const performRemove=()=>{o(n),a&&!a.persisted&&a.afterLeave&&a.afterLeave()};if(1&e.shapeFlag&&a&&!a.persisted){const{leave:t,delayLeave:o}=a,performLeave=()=>t(n,performRemove);o?o(e.el,performRemove,performLeave):performLeave()}else performRemove()},removeFragment=(e,t)=>{let n;for(;e!==t;)n=g(e),o(e),e=n;o(t)},unmountComponent=(e,t,n)=>{"production"!==process.env.NODE_ENV&&e.type.__hmrId&&function(e){be.get(e.type.__hmrId).instances.delete(e)}(e);const{bum:o,scope:r,job:a,subTree:s,um:i,m:c,a:d,parent:p,slots:{__:u}}=e;var f;invalidateMount(c),invalidateMount(d),o&&invokeArrayFns(o),p&&l(u)&&u.forEach(e=>{p.renderCache[e]=void 0}),r.stop(),a&&(a.flags|=8,unmount(s,e,t,n)),i&&queuePostRenderEffect(i,t),queuePostRenderEffect(()=>{e.isUnmounted=!0},t),t&&t.pendingBranch&&!t.isUnmounted&&e.asyncDep&&!e.asyncResolved&&e.suspenseId===t.pendingId&&(t.deps--,0===t.deps&&t.resolve()),"production"!==process.env.NODE_ENV&&(f=e,ye&&"function"==typeof ye.cleanupBuffer&&!ye.cleanupBuffer(f)&&ke(f))},unmountChildren=(e,t,n,o=!1,r=!1,a=0)=>{for(let s=a;s<e.length;s++)unmount(e[s],t,n,o,r)},getNextHostNode=e=>{if(6&e.shapeFlag)return getNextHostNode(e.component.subTree);if(128&e.shapeFlag)return e.suspense.next();const t=g(e.anchor||e.el),n=t&&t[Ce];return n?g(n):t};let _=!1;const render=(e,t,n)=>{null==e?t._vnode&&unmount(t._vnode,null,null,!0):patch(t._vnode||null,e,t,null,null,null,n),t._vnode=e,_||(_=!0,flushPreFlushCbs(),flushPostFlushCbs(),_=!1)},N={p:patch,um:unmount,m:move,r:remove2,mt:mountComponent,mc:mountChildren,pc:patchChildren,pbc:patchBlockChildren,n:getNextHostNode,o:e};let w;return{render:render,hydrate:w,createApp:createAppAPI(render)}}(e)}function resolveChildrenNamespace({type:e,props:t},n){return"svg"===n&&"foreignObject"===e||"mathml"===n&&"annotation-xml"===e&&t&&t.encoding&&t.encoding.includes("html")?void 0:n}function toggleRecurse({effect:e,job:t},n){n?(e.flags|=32,t.flags|=4):(e.flags&=-33,t.flags&=-5)}function traverseStaticChildren(e,t,n=!1){const o=e.children,r=t.children;if(l(o)&&l(r))for(let a=0;a<o.length;a++){const e=o[a];let t=r[a];1&t.shapeFlag&&!t.dynamicChildren&&((t.patchFlag<=0||32===t.patchFlag)&&(t=r[a]=cloneIfMounted(r[a]),t.el=e.el),n||-2===t.patchFlag||traverseStaticChildren(e,t)),t.type===tt&&(t.el=e.el),t.type!==nt||t.el||(t.el=e.el),"production"!==process.env.NODE_ENV&&t.el&&(t.el.__vnode=t)}}function locateNonHydratedAsyncRoot(e){const t=e.subTree.component;if(t)return t.asyncDep&&!t.asyncResolved?t:locateNonHydratedAsyncRoot(t)}function invalidateMount(e){if(e)for(let t=0;t<e.length;t++)e[t].flags|=8}const Qe=Symbol.for("v-scx"),useSSRContext=()=>{{const e=inject(Qe);return e||"production"!==process.env.NODE_ENV&&warn$1("Server rendering context not provided. Make sure to only call useSSRContext() conditionally in the server build."),e}};function watch(e,t,n){return"production"===process.env.NODE_ENV||isFunction(t)||warn$1("`watch(fn, options?)` signature has been moved to a separate API. Use `watchEffect(fn, options?)` instead. `watch` now only supports `watch(source, cb, options?) signature."),doWatch(e,t,n)}function doWatch(e,t,n=a){const{immediate:o,deep:r,flush:s,once:c}=n;"production"===process.env.NODE_ENV||t||(void 0!==o&&warn$1('watch() "immediate" option is only respected when using the watch(source, callback, options?) signature.'),void 0!==r&&warn$1('watch() "deep" option is only respected when using the watch(source, callback, options?) signature.'),void 0!==c&&warn$1('watch() "once" option is only respected when using the watch(source, callback, options?) signature.'));const l=i({},n);"production"!==process.env.NODE_ENV&&(l.onWarn=warn$1);const d=t&&o||!t&&"post"!==s;let p;if(vt)if("sync"===s){const e=useSSRContext();p=e.__watcherHandles||(e.__watcherHandles=[])}else if(!d){const watchStopHandle=()=>{};return watchStopHandle.stop=NOOP,watchStopHandle.resume=NOOP,watchStopHandle.pause=NOOP,watchStopHandle}const u=dt;l.call=(e,t,n)=>callWithAsyncErrorHandling(e,u,t,n);let f=!1;"post"===s?l.scheduler=e=>{queuePostRenderEffect(e,u&&u.suspense)}:"sync"!==s&&(f=!0,l.scheduler=(e,t)=>{t?e():queueJob(e)}),l.augmentJob=e=>{t&&(e.flags|=4),f&&(e.flags|=2,u&&(e.id=u.uid,e.i=u))};const v=watch$1(e,t,l);return vt&&(p?p.push(v):d&&v()),v}function instanceWatch(e,t,n){const o=this.proxy,r=isString(e)?e.includes(".")?createPathGetter(o,e):()=>o[e]:e.bind(o,o);let a;isFunction(t)?a=t:(a=t.handler,n=t);const s=setCurrentInstance(this),i=doWatch(r,a.bind(o),n);return s(),i}function createPathGetter(e,t){const n=t.split(".");return()=>{let t=e;for(let e=0;e<n.length&&t;e++)t=t[n[e]];return t}}const getModelModifiers=(e,t)=>"modelValue"===t||"model-value"===t?e.modelModifiers:e[`${t}Modifiers`]||e[`${v(t)}Modifiers`]||e[`${m(t)}Modifiers`];function emit(e,t,...n){if(e.isUnmounted)return;const o=e.vnode.props||a;if("production"!==process.env.NODE_ENV){const{emitsOptions:o,propsOptions:[r]}=e;if(o)if(t in o){const e=o[t];if(isFunction(e)){e(...n)||warn$1(`Invalid event arguments: event validation failed for event "${t}".`)}}else r&&b(v(t))in r||warn$1(`Component emitted event "${t}" but it is neither declared in the emits option nor as an "${b(v(t))}" prop.`)}let r=n;const s=t.startsWith("update:"),i=s&&getModelModifiers(o,t.slice(7));if(i&&(i.trim&&(r=n.map(e=>isString(e)?e.trim():e)),i.number&&(r=n.map(looseToNumber))),"production"!==process.env.NODE_ENV&&function(e,t,n){emit$1("component:emit",e.appContext.app,e,t,n)}(e,t,r),"production"!==process.env.NODE_ENV){const n=t.toLowerCase();n!==t&&o[b(n)]&&warn$1(`Event "${n}" is emitted in component ${formatComponentName(e,e.type)} but the handler is registered for "${t}". Note that HTML attributes are case-insensitive and you cannot use v-on to listen to camelCase events when using in-DOM templates. You should probably use "${m(t)}" instead of "${t}".`)}let c,l=o[c=b(t)]||o[c=b(v(t))];!l&&s&&(l=o[c=b(m(t))]),l&&callWithAsyncErrorHandling(l,e,6,r);const d=o[c+"Once"];if(d){if(e.emitted){if(e.emitted[c])return}else e.emitted={};e.emitted[c]=!0,callWithAsyncErrorHandling(d,e,6,r)}}function normalizeEmitsOptions(e,t,n=!1){const o=t.emitsCache,r=o.get(e);if(void 0!==r)return r;const a=e.emits;let s={},c=!1;if(!isFunction(e)){const extendEmits=e=>{const n=normalizeEmitsOptions(e,t,!0);n&&(c=!0,i(s,n))};!n&&t.mixins.length&&t.mixins.forEach(extendEmits),e.extends&&extendEmits(e.extends),e.mixins&&e.mixins.forEach(extendEmits)}return a||c?(l(a)?a.forEach(e=>s[e]=null):i(s,a),isObject(e)&&o.set(e,s),s):(isObject(e)&&o.set(e,null),null)}function isEmitListener(e,t){return!(!e||!isOn(t))&&(t=t.slice(2).replace(/Once$/,""),hasOwn(e,t[0].toLowerCase()+t.slice(1))||hasOwn(e,m(t))||hasOwn(e,t))}let Xe=!1;function markAttrsAccessed(){Xe=!0}function renderComponentRoot(e){const{type:t,vnode:n,proxy:o,withProxy:r,propsOptions:[a],slots:s,attrs:i,emit:c,render:l,renderCache:d,props:p,data:u,setupState:f,ctx:v,inheritAttrs:h}=e,m=setCurrentRenderingInstance(e);let g,b;"production"!==process.env.NODE_ENV&&(Xe=!1);try{if(4&n.shapeFlag){const e=r||o,t="production"!==process.env.NODE_ENV&&f.__isScriptSetup?new Proxy(e,{get:(e,t,n)=>(warn$1(`Property '${String(t)}' was accessed via 'this'. Avoid using 'this' in templates.`),Reflect.get(e,t,n))}):e;g=normalizeVNode(l.call(t,e,d,"production"!==process.env.NODE_ENV?shallowReadonly(p):p,f,u,v)),b=i}else{const e=t;"production"!==process.env.NODE_ENV&&i===p&&markAttrsAccessed(),g=normalizeVNode(e.length>1?e("production"!==process.env.NODE_ENV?shallowReadonly(p):p,"production"!==process.env.NODE_ENV?{get attrs(){return markAttrsAccessed(),shallowReadonly(i)},slots:s,emit:c}:{attrs:i,slots:s,emit:c}):e("production"!==process.env.NODE_ENV?shallowReadonly(p):p,null)),b=t.props?i:getFunctionalFallthrough(i)}}catch(N){rt.length=0,handleError(N,e,1),g=it(nt)}let y,_=g;if("production"!==process.env.NODE_ENV&&g.patchFlag>0&&2048&g.patchFlag&&([_,y]=getChildRoot(g)),b&&!1!==h){const e=Object.keys(b),{shapeFlag:t}=_;if(e.length)if(7&t)a&&e.some(isModelListener)&&(b=filterModelListeners(b,a)),_=cloneVNode(_,b,!1,!0);else if("production"!==process.env.NODE_ENV&&!Xe&&_.type!==nt){const e=Object.keys(i),t=[],n=[];for(let o=0,r=e.length;o<r;o++){const r=e[o];isOn(r)?isModelListener(r)||t.push(r[2].toLowerCase()+r.slice(3)):n.push(r)}n.length&&warn$1(`Extraneous non-props attributes (${n.join(", ")}) were passed to component but could not be automatically inherited because component renders fragment or text or teleport root nodes.`),t.length&&warn$1(`Extraneous non-emits event listeners (${t.join(", ")}) were passed to component but could not be automatically inherited because component renders fragment or text root nodes. If the listener is intended to be a component custom event listener only, declare it using the "emits" option.`)}}return n.dirs&&("production"===process.env.NODE_ENV||isElementRoot(_)||warn$1("Runtime directive used on component with non-element root node. The directives will not function as intended."),_=cloneVNode(_,null,!1,!0),_.dirs=_.dirs?_.dirs.concat(n.dirs):n.dirs),n.transition&&("production"===process.env.NODE_ENV||isElementRoot(_)||warn$1("Component inside <Transition> renders non-element root node that cannot be animated."),setTransitionHooks(_,n.transition)),"production"!==process.env.NODE_ENV&&y?y(_):g=_,setCurrentRenderingInstance(m),g}const getChildRoot=e=>{const t=e.children,n=e.dynamicChildren,o=filterSingleRoot(t,!1);if(!o)return[e,void 0];if("production"!==process.env.NODE_ENV&&o.patchFlag>0&&2048&o.patchFlag)return getChildRoot(o);const r=t.indexOf(o),a=n?n.indexOf(o):-1;return[normalizeVNode(o),o=>{t[r]=o,n&&(a>-1?n[a]=o:o.patchFlag>0&&(e.dynamicChildren=[...n,o]))}]};function filterSingleRoot(e,t=!0){let n;for(let o=0;o<e.length;o++){const r=e[o];if(!isVNode(r))return;if(r.type!==nt||"v-if"===r.children){if(n)return;if(n=r,"production"!==process.env.NODE_ENV&&t&&n.patchFlag>0&&2048&n.patchFlag)return filterSingleRoot(n.children)}}return n}const getFunctionalFallthrough=e=>{let t;for(const n in e)("class"===n||"style"===n||isOn(n))&&((t||(t={}))[n]=e[n]);return t},filterModelListeners=(e,t)=>{const n={};for(const o in e)isModelListener(o)&&o.slice(9)in t||(n[o]=e[o]);return n},isElementRoot=e=>7&e.shapeFlag||e.type===nt;function hasPropsChanged(e,t,n){const o=Object.keys(t);if(o.length!==Object.keys(e).length)return!0;for(let r=0;r<o.length;r++){const a=o[r];if(t[a]!==e[a]&&!isEmitListener(n,a))return!0}return!1}const isSuspense=e=>e.__isSuspense;const et=Symbol.for("v-fgt"),tt=Symbol.for("v-txt"),nt=Symbol.for("v-cmt"),ot=Symbol.for("v-stc"),rt=[];let at=null;function openBlock(e=!1){rt.push(at=e?null:[])}let st=1;function setBlockTracking(e,t=!1){st+=e,e<0&&at&&t&&(at.hasOnce=!0)}function setupBlock(e){return e.dynamicChildren=st>0?at||s:null,rt.pop(),at=rt[rt.length-1]||null,st>0&&at&&at.push(e),e}function createElementBlock(e,t,n,o,r,a){return setupBlock(createBaseVNode(e,t,n,o,r,a,!0))}function createBlock(e,t,n,o,r){return setupBlock(it(e,t,n,o,r,!0))}function isVNode(e){return!!e&&!0===e.__v_isVNode}function isSameVNodeType(e,t){if("production"!==process.env.NODE_ENV&&6&t.shapeFlag&&e.component){const n=ge.get(t.type);if(n&&n.has(e.component))return e.shapeFlag&=-257,t.shapeFlag&=-513,!1}return e.type===t.type&&e.key===t.key}const normalizeKey=({key:e})=>null!=e?e:null,normalizeRef=({ref:e,ref_key:t,ref_for:n})=>("number"==typeof e&&(e=""+e),null!=e?isString(e)||isRef(e)||isFunction(e)?{i:Oe,r:e,k:t,f:!!n}:e:null);function createBaseVNode(e,t=null,n=null,o=0,r=null,a=(e===et?0:1),s=!1,i=!1){const c={__v_isVNode:!0,__v_skip:!0,type:e,props:t,key:t&&normalizeKey(t),ref:t&&normalizeRef(t),scopeId:De,slotScopeIds:null,children:n,component:null,suspense:null,ssContent:null,ssFallback:null,dirs:null,transition:null,el:null,anchor:null,target:null,targetStart:null,targetAnchor:null,staticCount:0,shapeFlag:a,patchFlag:o,dynamicProps:r,dynamicChildren:null,appContext:null,ctx:Oe};return i?(normalizeChildren(c,n),128&a&&e.normalize(c)):n&&(c.shapeFlag|=isString(n)?8:16),"production"!==process.env.NODE_ENV&&c.key!=c.key&&warn$1("VNode created with invalid key (NaN). VNode type:",c.type),st>0&&!s&&at&&(c.patchFlag>0||6&a)&&32!==c.patchFlag&&at.push(c),c}const it="production"!==process.env.NODE_ENV?(...e)=>_createVNode(...e):_createVNode;function _createVNode(e,t=null,n=null,o=0,r=null,a=!1){if(e&&e!==ze||("production"===process.env.NODE_ENV||e||warn$1(`Invalid vnode type when creating vnode: ${e}.`),e=nt),isVNode(e)){const o=cloneVNode(e,t,!0);return n&&normalizeChildren(o,n),st>0&&!a&&at&&(6&o.shapeFlag?at[at.indexOf(e)]=o:at.push(o)),o.patchFlag=-2,o}if(isClassComponent(e)&&(e=e.__vccOpts),t){t=function(e){return e?isProxy(e)||isInternalObject(e)?i({},e):e:null}(t);let{class:e,style:n}=t;e&&!isString(e)&&(t.class=normalizeClass(e)),isObject(n)&&(isProxy(n)&&!l(n)&&(n=i({},n)),t.style=normalizeStyle(n))}const s=isString(e)?1:isSuspense(e)?128:(e=>e.__isTeleport)(e)?64:isObject(e)?4:isFunction(e)?2:0;return"production"!==process.env.NODE_ENV&&4&s&&isProxy(e)&&warn$1("Vue received a Component that was made a reactive object. This can lead to unnecessary performance overhead and should be avoided by marking the component with `markRaw` or using `shallowRef` instead of `ref`.","\nComponent that was made reactive: ",e=toRaw(e)),createBaseVNode(e,t,n,o,r,s,a,!0)}function cloneVNode(e,t,n=!1,o=!1){const{props:r,ref:a,patchFlag:s,children:i,transition:c}=e,d=t?function(...e){const t={};for(let n=0;n<e.length;n++){const o=e[n];for(const e in o)if("class"===e)t.class!==o.class&&(t.class=normalizeClass([t.class,o.class]));else if("style"===e)t.style=normalizeStyle([t.style,o.style]);else if(isOn(e)){const n=t[e],r=o[e];!r||n===r||l(n)&&n.includes(r)||(t[e]=n?[].concat(n,r):r)}else""!==e&&(t[e]=o[e])}return t}(r||{},t):r,p={__v_isVNode:!0,__v_skip:!0,type:e.type,props:d,key:d&&normalizeKey(d),ref:t&&t.ref?n&&a?l(a)?a.concat(normalizeRef(t)):[a,normalizeRef(t)]:normalizeRef(t):a,scopeId:e.scopeId,slotScopeIds:e.slotScopeIds,children:"production"!==process.env.NODE_ENV&&-1===s&&l(i)?i.map(deepCloneVNode):i,target:e.target,targetStart:e.targetStart,targetAnchor:e.targetAnchor,staticCount:e.staticCount,shapeFlag:e.shapeFlag,patchFlag:t&&e.type!==et?-1===s?16:16|s:s,dynamicProps:e.dynamicProps,dynamicChildren:e.dynamicChildren,appContext:e.appContext,dirs:e.dirs,transition:c,component:e.component,suspense:e.suspense,ssContent:e.ssContent&&cloneVNode(e.ssContent),ssFallback:e.ssFallback&&cloneVNode(e.ssFallback),placeholder:e.placeholder,el:e.el,anchor:e.anchor,ctx:e.ctx,ce:e.ce};return c&&o&&setTransitionHooks(p,c.clone(p)),p}function deepCloneVNode(e){const t=cloneVNode(e);return l(e.children)&&(t.children=e.children.map(deepCloneVNode)),t}function createTextVNode(e=" ",t=0){return it(tt,null,e,t)}function createStaticVNode(e,t){const n=it(ot,null,e);return n.staticCount=t,n}function createCommentVNode(e="",t=!1){return t?(openBlock(),createBlock(nt,null,e)):it(nt,null,e)}function normalizeVNode(e){return null==e||"boolean"==typeof e?it(nt):l(e)?it(et,null,e.slice()):isVNode(e)?cloneIfMounted(e):it(tt,null,String(e))}function cloneIfMounted(e){return null===e.el&&-1!==e.patchFlag||e.memo?e:cloneVNode(e)}function normalizeChildren(e,t){let n=0;const{shapeFlag:o}=e;if(null==t)t=null;else if(l(t))n=16;else if("object"==typeof t){if(65&o){const n=t.default;return void(n&&(n._c&&(n._d=!1),normalizeChildren(e,n()),n._c&&(n._d=!0)))}{n=32;const o=t._;o||isInternalObject(t)?3===o&&Oe&&(1===Oe.slots._?t._=1:(t._=2,e.patchFlag|=1024)):t._ctx=Oe}}else isFunction(t)?(t={default:t,_ctx:Oe},n=32):(t=String(t),64&o?(n=16,t=[createTextVNode(t)]):n=8);e.children=t,e.shapeFlag|=n}function invokeVNodeHook(e,t,n,o=null){callWithAsyncErrorHandling(e,t,7,[n,o])}const ct=createAppContext();let lt=0;let dt=null;const getCurrentInstance=()=>dt||Oe;let pt,ut;{const e=getGlobalThis(),registerGlobalSetter=(t,n)=>{let o;return(o=e[t])||(o=e[t]=[]),o.push(n),e=>{o.length>1?o.forEach(t=>t(e)):o[0](e)}};pt=registerGlobalSetter("__VUE_INSTANCE_SETTERS__",e=>dt=e),ut=registerGlobalSetter("__VUE_SSR_SETTERS__",e=>vt=e)}const setCurrentInstance=e=>{const t=dt;return pt(e),e.scope.on(),()=>{e.scope.off(),pt(t)}},unsetCurrentInstance=()=>{dt&&dt.scope.off(),pt(null)},ft=makeMap("slot,component");function validateComponentName(e,{isNativeTag:t}){(ft(e)||t(e))&&warn$1("Do not use built-in or reserved HTML elements as component id: "+e)}function isStatefulComponent(e){return 4&e.vnode.shapeFlag}let vt=!1;function handleSetupResult(e,t,n){isFunction(t)?e.type.__ssrInlineRender?e.ssrRender=t:e.render=t:isObject(t)?("production"!==process.env.NODE_ENV&&isVNode(t)&&warn$1("setup() should not return VNodes directly - return a render function instead."),"production"!==process.env.NODE_ENV&&(e.devtoolsRawSetupState=t),e.setupState=proxyRefs(t),"production"!==process.env.NODE_ENV&&function(e){const{ctx:t,setupState:n}=e;Object.keys(toRaw(n)).forEach(e=>{if(!n.__isScriptSetup){if(isReservedPrefix(e[0]))return void warn$1(`setup() return property ${JSON.stringify(e)} should not start with "$" or "_" which are reserved prefixes for Vue internals.`);Object.defineProperty(t,e,{enumerable:!0,configurable:!0,get:()=>n[e],set:NOOP})}})}(e)):"production"!==process.env.NODE_ENV&&void 0!==t&&warn$1("setup() should return an object. Received: "+(null===t?"null":typeof t)),finishComponentSetup(e,n)}const isRuntimeOnly=()=>!0;function finishComponentSetup(e,t,n){const o=e.type;e.render||(e.render=o.render||NOOP);{const t=setCurrentInstance(e);pauseTracking();try{applyOptions(e)}finally{resetTracking(),t()}}"production"===process.env.NODE_ENV||o.render||e.render!==NOOP||t||(o.template?warn$1('Component provided template option but runtime compilation is not supported in this build of Vue. Configure your bundler to alias "vue" to "vue/dist/vue.esm-bundler.js".'):warn$1("Component is missing template or render function: ",o))}const ht="production"!==process.env.NODE_ENV?{get:(e,t)=>(markAttrsAccessed(),track(e,"get",""),e[t]),set:()=>(warn$1("setupContext.attrs is readonly."),!1),deleteProperty:()=>(warn$1("setupContext.attrs is readonly."),!1)}:{get:(e,t)=>(track(e,"get",""),e[t])};function getComponentPublicInstance(e){return e.exposed?e.exposeProxy||(e.exposeProxy=new Proxy(proxyRefs((t=e.exposed,!hasOwn(t,"__v_skip")&&Object.isExtensible(t)&&def(t,"__v_skip",!0),t)),{get:(t,n)=>n in t?t[n]:n in He?He[n](e):void 0,has:(e,t)=>t in e||t in He})):e.proxy;var t}const mt=/(?:^|[-_])(\w)/g,classify=e=>e.replace(mt,e=>e.toUpperCase()).replace(/[-_]/g,"");function getComponentName(e,t=!0){return isFunction(e)?e.displayName||e.name:e.name||t&&e.__name}function formatComponentName(e,t,n=!1){let o=getComponentName(t);if(!o&&t.__file){const e=t.__file.match(/([^/\\]+)\.\w+$/);e&&(o=e[1])}if(!o&&e&&e.parent){const inferFromRegistry=e=>{for(const n in e)if(e[n]===t)return n};o=inferFromRegistry(e.components||e.parent.type.components)||inferFromRegistry(e.appContext.components)}return o?classify(o):n?"App":"Anonymous"}function isClassComponent(e){return isFunction(e)&&"__vccOpts"in e}const computed=(e,t)=>{const n=function(e,t,n=!1){let o,r;isFunction(e)?o=e:(o=e.get,r=e.set);const a=new ComputedRefImpl(o,r,n);return process.env.NODE_ENV,a}(e,0,vt);if("production"!==process.env.NODE_ENV){const e=getCurrentInstance();e&&e.appContext.config.warnRecursiveComputed&&(n._warnRecursive=!0)}return n};const gt="3.5.18",bt="production"!==process.env.NODE_ENV?warn$1:NOOP;
+/**
+  * @vue/runtime-dom v3.5.18
+  * (c) 2018-present Yuxi (Evan) You and Vue contributors
+  * @license MIT
+  **/
+let yt;process.env.NODE_ENV,process.env.NODE_ENV;const _t="undefined"!=typeof window&&window.trustedTypes;if(_t)try{yt=_t.createPolicy("vue",{createHTML:e=>e})}catch(mo){"production"!==process.env.NODE_ENV&&bt(`Error creating trusted types policy: ${mo}`)}const Nt=yt?e=>yt.createHTML(e):e=>e,wt="undefined"!=typeof document?document:null,Et=wt&&wt.createElement("template"),kt={insert:(e,t,n)=>{t.insertBefore(e,n||null)},remove:e=>{const t=e.parentNode;t&&t.removeChild(e)},createElement:(e,t,n,o)=>{const r="svg"===t?wt.createElementNS("http://www.w3.org/2000/svg",e):"mathml"===t?wt.createElementNS("http://www.w3.org/1998/Math/MathML",e):n?wt.createElement(e,{is:n}):wt.createElement(e);return"select"===e&&o&&null!=o.multiple&&r.setAttribute("multiple",o.multiple),r},createText:e=>wt.createTextNode(e),createComment:e=>wt.createComment(e),setText:(e,t)=>{e.nodeValue=t},setElementText:(e,t)=>{e.textContent=t},parentNode:e=>e.parentNode,nextSibling:e=>e.nextSibling,querySelector:e=>wt.querySelector(e),setScopeId(e,t){e.setAttribute(t,"")},insertStaticContent(e,t,n,o,r,a){const s=n?n.previousSibling:t.lastChild;if(r&&(r===a||r.nextSibling))for(;t.insertBefore(r.cloneNode(!0),n),r!==a&&(r=r.nextSibling););else{Et.innerHTML=Nt("svg"===o?`<svg>${e}</svg>`:"mathml"===o?`<math>${e}</math>`:e);const r=Et.content;if("svg"===o||"mathml"===o){const e=r.firstChild;for(;e.firstChild;)r.appendChild(e.firstChild);r.removeChild(e)}t.insertBefore(r,n)}return[s?s.nextSibling:t.firstChild,n?n.previousSibling:t.lastChild]}},xt=Symbol("_vtc");const Vt=Symbol("_vod"),Ot=Symbol("_vsh");process.env.NODE_ENV;const Dt=Symbol("production"!==process.env.NODE_ENV?"CSS_VAR_TEXT":""),Ct=/(^|;)\s*display\s*:/;const Rt=/[^\\];\s*$/,St=/\s*!important$/;function setStyle(e,t,n){if(l(n))n.forEach(n=>setStyle(e,t,n));else if(null==n&&(n=""),"production"!==process.env.NODE_ENV&&Rt.test(n)&&bt(`Unexpected semicolon at the end of '${t}' style value: '${n}'`),t.startsWith("--"))e.setProperty(t,n);else{const o=function(e,t){const n=At[t];if(n)return n;let o=v(t);if("filter"!==o&&o in e)return At[t]=o;o=g(o);for(let r=0;r<$t.length;r++){const n=$t[r]+o;if(n in e)return At[t]=n}return t}(e,t);St.test(n)?e.setProperty(m(o),n.replace(St,""),"important"):e[o]=n}}const $t=["Webkit","Moz","ms"],At={};const Pt="http://www.w3.org/1999/xlink";function patchAttr(e,t,n,o,r,a=V(t)){o&&t.startsWith("xlink:")?null==n?e.removeAttributeNS(Pt,t.slice(6,t.length)):e.setAttributeNS(Pt,t,n):null==n||a&&!includeBooleanAttr(n)?e.removeAttribute(t):e.setAttribute(t,a?"":isSymbol(n)?String(n):n)}function patchDOMProp(e,t,n,o,r){if("innerHTML"===t||"textContent"===t)return void(null!=n&&(e[t]="innerHTML"===t?Nt(n):n));const a=e.tagName;if("value"===t&&"PROGRESS"!==a&&!a.includes("-")){const o="OPTION"===a?e.getAttribute("value")||"":e.value,r=null==n?"checkbox"===e.type?"on":"":String(n);return o===r&&"_value"in e||(e.value=r),null==n&&e.removeAttribute(t),void(e._value=n)}let s=!1;if(""===n||null==n){const o=typeof e[t];"boolean"===o?n=includeBooleanAttr(n):null==n&&"string"===o?(n="",s=!0):"number"===o&&(n=0,s=!0)}try{e[t]=n}catch(mo){"production"===process.env.NODE_ENV||s||bt(`Failed setting prop "${t}" on <${a.toLowerCase()}>: value ${n} is invalid.`,mo)}s&&e.removeAttribute(r||t)}const Bt=Symbol("_vei");function patchEvent(e,t,n,o,r=null){const a=e[Bt]||(e[Bt]={}),s=a[t];if(o&&s)s.value="production"!==process.env.NODE_ENV?sanitizeEventValue(o,t):o;else{const[n,i]=function(e){let t;if(Mt.test(e)){let n;for(t={};n=e.match(Mt);)e=e.slice(0,e.length-n[0].length),t[n[0].toLowerCase()]=!0}const n=":"===e[2]?e.slice(3):m(e.slice(2));return[n,t]}(t);if(o){const s=a[t]=function(e,t){const invoker=e=>{if(e._vts){if(e._vts<=invoker.attached)return}else e._vts=Date.now();callWithAsyncErrorHandling(function(e,t){if(l(t)){const n=e.stopImmediatePropagation;return e.stopImmediatePropagation=()=>{n.call(e),e._stopped=!0},t.map(e=>t=>!t._stopped&&e&&e(t))}return t}(e,invoker.value),t,5,[e])};return invoker.value=e,invoker.attached=getNow(),invoker}("production"!==process.env.NODE_ENV?sanitizeEventValue(o,t):o,r);!function(e,t,n,o){e.addEventListener(t,n,o)}(e,n,s,i)}else s&&(!function(e,t,n,o){e.removeEventListener(t,n,o)}(e,n,s,i),a[t]=void 0)}}const Mt=/(?:Once|Passive|Capture)$/;let It=0;const Tt=Promise.resolve(),getNow=()=>It||(Tt.then(()=>It=0),It=Date.now());function sanitizeEventValue(e,t){return isFunction(e)||l(e)?e:(bt(`Wrong type passed as event handler to ${t} - did you forget @ or : in front of your prop?\nExpected function or array of functions, received type ${typeof e}.`),NOOP)}const isNativeOn=e=>111===e.charCodeAt(0)&&110===e.charCodeAt(1)&&e.charCodeAt(2)>96&&e.charCodeAt(2)<123;const jt=["ctrl","shift","alt","meta"],zt={stop:e=>e.stopPropagation(),prevent:e=>e.preventDefault(),self:e=>e.target!==e.currentTarget,ctrl:e=>!e.ctrlKey,shift:e=>!e.shiftKey,alt:e=>!e.altKey,meta:e=>!e.metaKey,left:e=>"button"in e&&0!==e.button,middle:e=>"button"in e&&1!==e.button,right:e=>"button"in e&&2!==e.button,exact:(e,t)=>jt.some(n=>e[`${n}Key`]&&!t.includes(n))},withModifiers=(e,t)=>{const n=e._withMods||(e._withMods={}),o=t.join(".");return n[o]||(n[o]=(n,...o)=>{for(let e=0;e<t.length;e++){const o=zt[t[e]];if(o&&o(n,t))return}return e(n,...o)})},Ht={esc:"escape",space:" ",up:"arrow-up",left:"arrow-left",right:"arrow-right",down:"arrow-down",delete:"backspace"},withKeys=(e,t)=>{const n=e._withKeys||(e._withKeys={}),o=t.join(".");return n[o]||(n[o]=n=>{if(!("key"in n))return;const o=m(n.key);return t.some(e=>e===o||Ht[e]===o)?e(n):void 0})},Ft=i({patchProp:(e,t,n,o,r,a)=>{const s="svg"===r;"class"===t?function(e,t,n){const o=e[xt];o&&(t=(t?[t,...o]:[...o]).join(" ")),null==t?e.removeAttribute("class"):n?e.setAttribute("class",t):e.className=t}(e,o,s):"style"===t?function(e,t,n){const o=e.style,r=isString(n);let a=!1;if(n&&!r){if(t)if(isString(t))for(const e of t.split(";")){const t=e.slice(0,e.indexOf(":")).trim();null==n[t]&&setStyle(o,t,"")}else for(const e in t)null==n[e]&&setStyle(o,e,"");for(const e in n)"display"===e&&(a=!0),setStyle(o,e,n[e])}else if(r){if(t!==n){const e=o[Dt];e&&(n+=";"+e),o.cssText=n,a=Ct.test(n)}}else t&&e.removeAttribute("style");Vt in e&&(e[Vt]=a?o.display:"",e[Ot]&&(o.display="none"))}(e,n,o):isOn(t)?isModelListener(t)||patchEvent(e,t,0,o,a):("."===t[0]?(t=t.slice(1),1):"^"===t[0]?(t=t.slice(1),0):function(e,t,n,o){if(o)return"innerHTML"===t||"textContent"===t||!!(t in e&&isNativeOn(t)&&isFunction(n));if("spellcheck"===t||"draggable"===t||"translate"===t||"autocorrect"===t)return!1;if("form"===t)return!1;if("list"===t&&"INPUT"===e.tagName)return!1;if("type"===t&&"TEXTAREA"===e.tagName)return!1;if("width"===t||"height"===t){const t=e.tagName;if("IMG"===t||"VIDEO"===t||"CANVAS"===t||"SOURCE"===t)return!1}if(isNativeOn(t)&&isString(n))return!1;return t in e}(e,t,o,s))?(patchDOMProp(e,t,o),e.tagName.includes("-")||"value"!==t&&"checked"!==t&&"selected"!==t||patchAttr(e,t,o,s,0,"value"!==t)):!e._isVueCE||!/[A-Z]/.test(t)&&isString(o)?("true-value"===t?e._trueValue=o:"false-value"===t&&(e._falseValue=o),patchAttr(e,t,o,s)):patchDOMProp(e,v(t),o,0,t)}},kt);let Lt;const createApp=(...e)=>{const t=(Lt||(Lt=createRenderer(Ft))).createApp(...e);"production"!==process.env.NODE_ENV&&(function(e){Object.defineProperty(e.config,"isNativeTag",{value:e=>E(e)||k(e)||x(e),writable:!1})}(t),function(e){{const t=e.config.isCustomElement;Object.defineProperty(e.config,"isCustomElement",{get:()=>t,set(){bt("The `isCustomElement` config option is deprecated. Use `compilerOptions.isCustomElement` instead.")}});const n=e.config.compilerOptions,o='The `compilerOptions` config option is only respected when using a build of Vue.js that includes the runtime compiler (aka "full build"). Since you are using the runtime-only build, `compilerOptions` must be passed to `@vue/compiler-dom` in the build setup instead.\n- For vue-loader: pass it via vue-loader\'s `compilerOptions` loader option.\n- For vue-cli: see https://cli.vuejs.org/guide/webpack.html#modifying-options-of-a-loader\n- For vite: pass it via @vitejs/plugin-vue options. See https://github.com/vitejs/vite-plugin-vue/tree/main/packages/plugin-vue#example-for-passing-options-to-vuecompiler-sfc';Object.defineProperty(e.config,"compilerOptions",{get:()=>(bt(o),n),set(){bt(o)}})}}(t));const{mount:n}=t;return t.mount=e=>{const o=function(e){if(isString(e)){const t=document.querySelector(e);return"production"===process.env.NODE_ENV||t||bt(`Failed to mount app: mount target selector "${e}" returned null.`),t}"production"!==process.env.NODE_ENV&&window.ShadowRoot&&e instanceof window.ShadowRoot&&"closed"===e.mode&&bt('mounting on a ShadowRoot with `{mode: "closed"}` may lead to unpredictable bugs');return e}
+/**
+  * vue v3.5.18
+  * (c) 2018-present Yuxi (Evan) You and Vue contributors
+  * @license MIT
+  **/(e);if(!o)return;const r=t._component;isFunction(r)||r.render||r.template||(r.template=o.innerHTML),1===o.nodeType&&(o.textContent="");const a=n(o,!1,function(e){if(e instanceof SVGElement)return"svg";if("function"==typeof MathMLElement&&e instanceof MathMLElement)return"mathml"}(o));return o instanceof Element&&(o.removeAttribute("v-cloak"),o.setAttribute("data-v-app","")),a},t};"production"!==process.env.NODE_ENV&&function(){if("production"===process.env.NODE_ENV||"undefined"==typeof window)return;const e={style:"color:#3ba776"},t={style:"color:#1677ff"},n={style:"color:#f5222d"},o={style:"color:#eb2f96"},r={__vue_custom_formatter:!0,header(t){if(!isObject(t))return null;if(t.__isVue)return["div",e,"VueInstance"];if(isRef(t)){pauseTracking();const n=t.value;return resetTracking(),["div",{},["span",e,genRefFlag(t)],"<",formatValue(n),">"]}return isReactive(t)?["div",{},["span",e,isShallow(t)?"ShallowReactive":"Reactive"],"<",formatValue(t),">"+(isReadonly(t)?" (readonly)":"")]:isReadonly(t)?["div",{},["span",e,isShallow(t)?"ShallowReadonly":"Readonly"],"<",formatValue(t),">"]:null},hasBody:e=>e&&e.__isVue,body(e){if(e&&e.__isVue)return["div",{},...formatInstance(e.$)]}};function formatInstance(e){const t=[];e.type.props&&e.props&&t.push(createInstanceBlock("props",toRaw(e.props))),e.setupState!==a&&t.push(createInstanceBlock("setup",e.setupState)),e.data!==a&&t.push(createInstanceBlock("data",toRaw(e.data)));const n=extractKeys(e,"computed");n&&t.push(createInstanceBlock("computed",n));const r=extractKeys(e,"inject");return r&&t.push(createInstanceBlock("injected",r)),t.push(["div",{},["span",{style:o.style+";opacity:0.66"},"$ (internal): "],["object",{object:e}]]),t}function createInstanceBlock(e,t){return t=i({},t),Object.keys(t).length?["div",{style:"line-height:1.25em;margin-bottom:0.6em"},["div",{style:"color:#476582"},e],["div",{style:"padding-left:1.25em"},...Object.keys(t).map(e=>["div",{},["span",o,e+": "],formatValue(t[e],!1)])]]:["span",{}]}function formatValue(e,r=!0){return"number"==typeof e?["span",t,e]:"string"==typeof e?["span",n,JSON.stringify(e)]:"boolean"==typeof e?["span",o,e]:isObject(e)?["object",{object:r?toRaw(e):e}]:["span",n,String(e)]}function extractKeys(e,t){const n=e.type;if(isFunction(n))return;const o={};for(const r in e.ctx)isKeyOfType(n,r,t)&&(o[r]=e.ctx[r]);return o}function isKeyOfType(e,t,n){const o=e[n];return!!(l(o)&&o.includes(t)||isObject(o)&&t in o)||!(!e.extends||!isKeyOfType(e.extends,t,n))||!(!e.mixins||!e.mixins.some(e=>isKeyOfType(e,t,n)))||void 0}function genRefFlag(e){return isShallow(e)?"ShallowRef":e.effect?"ComputedRef":"Ref"}window.devtoolsFormatters?window.devtoolsFormatters.push(r):window.devtoolsFormatters=[r]}();const _export_sfc=(e,t)=>{const n=e.__vccOpts||e;for(const[o,r]of t)n[o]=r;return n},qt={name:"RepositoryCard",props:{repository:{type:Object,required:!0},selected:{type:Boolean,default:!1}},emits:["select"],methods:{formatNumber:e=>null==e?"0":e>=1e6?(e/1e6).toFixed(1)+"M":e>=1e3?(e/1e3).toFixed(1)+"k":e.toString(),formatDate(e){if(!e)return"Unknown";try{const t=new Date(e),n=new Date,o=Math.floor((n-t)/864e5);return 0===o?"today":1===o?"yesterday":o<7?`${o} days ago`:o<30?`${Math.floor(o/7)} weeks ago`:o<365?`${Math.floor(o/30)} months ago`:`${Math.floor(o/365)} years ago`}catch(t){return"Unknown"}},getLanguageColor:e=>({JavaScript:"#f1e05a",TypeScript:"#2b7489",Python:"#3572A5",Java:"#b07219",Go:"#00ADD8",Rust:"#dea584","C++":"#f34b7d",C:"#555555","C#":"#239120",PHP:"#4F5D95",Ruby:"#701516",Swift:"#ffac45",Kotlin:"#F18E33",Scala:"#c22d40",Dart:"#00B4AB",R:"#198CE7",Shell:"#89e051",PowerShell:"#012456",HTML:"#e34c26",CSS:"#563d7c",Vue:"#2c3e50",React:"#61dafb",Angular:"#dd0031"}[e]||"#586069"),openRepository(e){e.preventDefault(),e.stopPropagation();const t=this.repository.html_url||`https://github.com/${this.repository.full_name}`;window.open(t,"_blank","noopener,noreferrer")}}},Wt={class:"repo-card__header"},Ut={class:"repo-card__title-section"},Gt={class:"repo-card__name"},Kt={class:"repo-card__stats"},Jt={key:0,class:"repo-stat"},Zt={class:"repo-stat__value"},Yt={key:1,class:"repo-stat"},Qt={class:"repo-stat__value"},Xt={key:2,class:"repo-stat"},en={class:"repo-stat__value"},tn={class:"repo-card__content"},nn={class:"repo-card__description"},on={class:"repo-card__footer"},rn={class:"repo-card__meta"},an={key:0,class:"repo-language"},sn={class:"language-name"},cn={key:1,class:"repo-updated"},ln={class:"repo-card__actions"},dn=["aria-label"],pn={key:0,class:"repo-card__selected-indicator","aria-hidden":"true"};const un=_export_sfc(qt,[["render",function(e,t,n,o,r,a){return openBlock(),createElementBlock("article",{class:normalizeClass(["repo-card",{"repo-card--selected":n.selected}]),onClick:t[1]||(t[1]=t=>e.$emit("select",n.repository)),role:"button",tabindex:"0",onKeydown:[t[2]||(t[2]=withKeys(t=>e.$emit("select",n.repository),["enter"])),t[3]||(t[3]=withKeys(withModifiers(t=>e.$emit("select",n.repository),["prevent"]),["space"]))]},[createBaseVNode("header",Wt,[createBaseVNode("div",Ut,[createBaseVNode("h3",Gt,[t[4]||(t[4]=createBaseVNode("span",{class:"repo-card__icon"},"📁",-1)),createTextVNode(" "+toDisplayString(n.repository.name),1)]),createBaseVNode("div",Kt,[void 0!==n.repository.stargazers_count?(openBlock(),createElementBlock("div",Jt,[t[5]||(t[5]=createBaseVNode("span",{class:"repo-stat__icon"},"⭐",-1)),createBaseVNode("span",Zt,toDisplayString(a.formatNumber(n.repository.stargazers_count)),1)])):createCommentVNode("",!0),void 0!==n.repository.forks_count?(openBlock(),createElementBlock("div",Yt,[t[6]||(t[6]=createBaseVNode("span",{class:"repo-stat__icon"},"🍴",-1)),createBaseVNode("span",Qt,toDisplayString(a.formatNumber(n.repository.forks_count)),1)])):createCommentVNode("",!0),void 0!==n.repository.open_issues_count?(openBlock(),createElementBlock("div",Xt,[t[7]||(t[7]=createBaseVNode("span",{class:"repo-stat__icon"},"🐛",-1)),createBaseVNode("span",en,toDisplayString(a.formatNumber(n.repository.open_issues_count)),1)])):createCommentVNode("",!0)])])]),createBaseVNode("div",tn,[createBaseVNode("p",nn,toDisplayString(n.repository.description||"No description available"),1)]),createBaseVNode("footer",on,[createBaseVNode("div",rn,[n.repository.language?(openBlock(),createElementBlock("div",an,[createBaseVNode("span",{class:"language-dot",style:normalizeStyle({backgroundColor:a.getLanguageColor(n.repository.language)})},null,4),createBaseVNode("span",sn,toDisplayString(n.repository.language),1)])):createCommentVNode("",!0),n.repository.updated_at?(openBlock(),createElementBlock("div",cn," Updated "+toDisplayString(a.formatDate(n.repository.updated_at)),1)):createCommentVNode("",!0)]),createBaseVNode("div",ln,[createBaseVNode("button",{class:"repo-card__link-btn",onClick:t[0]||(t[0]=withModifiers((...e)=>a.openRepository&&a.openRepository(...e),["stop"])),"aria-label":`Open ${n.repository.name} on GitHub`,title:"View on GitHub"},t[8]||(t[8]=[createBaseVNode("span",{class:"link-icon"},"↗",-1)]),8,dn)])]),n.selected?(openBlock(),createElementBlock("div",pn)):createCommentVNode("",!0)],34)}],["styles",[".repo-card[data-v-34b49fef]{background:var(--color-canvas-default, #ffffff);border:1px solid var(--color-border-default, #d1d9e0);border-radius:var(--border-radius, 6px);padding:var(--space-3, 16px);cursor:pointer;transition:all var(--transition-duration, .2s) ease;position:relative;display:flex;flex-direction:column;gap:var(--space-3, 16px);min-height:140px}.repo-card[data-v-34b49fef]:hover{border-color:var(--color-accent-emphasis, #0969da);box-shadow:var(--shadow-medium, 0 3px 6px rgba(31, 35, 40, .15));transform:translateY(-1px)}.repo-card[data-v-34b49fef]:focus{outline:2px solid var(--color-accent-emphasis, #0969da);outline-offset:-2px}.repo-card--selected[data-v-34b49fef]{border-color:var(--color-accent-emphasis, #0969da);background:var(--color-canvas-subtle, #f6f8fa);box-shadow:var(--shadow-small, 0 1px 0 rgba(31, 35, 40, .04))}.repo-card__selected-indicator[data-v-34b49fef]{position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--color-accent-emphasis, #0969da);border-radius:var(--border-radius, 6px) 0 0 var(--border-radius, 6px)}.repo-card__header[data-v-34b49fef]{display:flex;flex-direction:column;gap:var(--space-2, 8px)}.repo-card__title-section[data-v-34b49fef]{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-2, 8px)}.repo-card__name[data-v-34b49fef]{margin:0;font-size:var(--font-size-medium, 16px);font-weight:600;color:var(--color-accent-fg, #0969da);line-height:1.25;display:flex;align-items:center;gap:var(--space-2, 8px);flex:1;min-width:0}.repo-card__icon[data-v-34b49fef]{font-size:var(--font-size-normal, 14px);flex-shrink:0}.repo-card__stats[data-v-34b49fef]{display:flex;gap:var(--space-3, 16px);align-items:center;flex-shrink:0}.repo-stat[data-v-34b49fef]{display:flex;align-items:center;gap:var(--space-1, 4px);font-size:var(--font-size-small, 12px);color:var(--color-fg-muted, #636c76)}.repo-stat__icon[data-v-34b49fef]{font-size:var(--font-size-small, 12px)}.repo-stat__value[data-v-34b49fef]{font-weight:500;color:var(--color-fg-default, #1f2328)}.repo-card__content[data-v-34b49fef]{flex:1}.repo-card__description[data-v-34b49fef]{margin:0;font-size:var(--font-size-normal, 14px);line-height:1.4;color:var(--color-fg-muted, #636c76);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis}.repo-card__footer[data-v-34b49fef]{display:flex;justify-content:space-between;align-items:center;gap:var(--space-2, 8px);margin-top:auto}.repo-card__meta[data-v-34b49fef]{display:flex;flex-direction:column;gap:var(--space-1, 4px);flex:1;min-width:0}.repo-language[data-v-34b49fef]{display:flex;align-items:center;gap:var(--space-2, 8px);font-size:var(--font-size-small, 12px);color:var(--color-fg-default, #1f2328)}.language-dot[data-v-34b49fef]{width:12px;height:12px;border-radius:50%;flex-shrink:0}.language-name[data-v-34b49fef]{font-weight:500}.repo-updated[data-v-34b49fef]{font-size:var(--font-size-small, 12px);color:var(--color-fg-subtle, #8c959f)}.repo-card__actions[data-v-34b49fef]{display:flex;align-items:center}.repo-card__link-btn[data-v-34b49fef]{display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:none;border:1px solid transparent;border-radius:var(--border-radius, 6px);cursor:pointer;color:var(--color-fg-muted, #636c76);transition:all var(--transition-duration, .2s) ease}.repo-card__link-btn[data-v-34b49fef]:hover{background:var(--color-canvas-subtle, #f6f8fa);border-color:var(--color-border-default, #d1d9e0);color:var(--color-fg-default, #1f2328)}.repo-card__link-btn[data-v-34b49fef]:focus{outline:2px solid var(--color-accent-emphasis, #0969da);outline-offset:-2px}.link-icon[data-v-34b49fef]{font-size:var(--font-size-normal, 14px);font-weight:700}@media (max-width: 768px){.repo-card__title-section[data-v-34b49fef]{flex-direction:column;align-items:stretch;gap:var(--space-2, 8px)}.repo-card__stats[data-v-34b49fef]{align-self:flex-start;gap:var(--space-2, 8px)}.repo-card__footer[data-v-34b49fef]{flex-direction:column;align-items:stretch;gap:var(--space-2, 8px)}.repo-card__actions[data-v-34b49fef]{align-self:flex-end}}@media (max-width: 480px){.repo-card[data-v-34b49fef]{padding:var(--space-2, 8px);gap:var(--space-2, 8px)}.repo-card__name[data-v-34b49fef]{font-size:var(--font-size-normal, 14px)}.repo-card__stats[data-v-34b49fef]{gap:var(--space-2, 8px)}.repo-stat[data-v-34b49fef]{font-size:11px}}@media (prefers-reduced-motion: reduce){.repo-card[data-v-34b49fef]{transition:none}.repo-card[data-v-34b49fef]:hover{transform:none}}@media (prefers-contrast: high){.repo-card[data-v-34b49fef]{border-width:2px}.repo-card[data-v-34b49fef]:hover,.repo-card--selected[data-v-34b49fef]{border-width:3px}}"]],["__scopeId","data-v-34b49fef"]]),fn={name:"PullRequestCard",props:{pullRequest:{type:Object,required:!0},showAdditionalInfo:{type:Boolean,default:!1}},emits:["select"],methods:{formatDate(e){if(!e)return"unknown time";try{const t=new Date(e),n=new Date,o=Math.floor((n-t)/1e3);if(o<60)return"just now";if(o<3600){const e=Math.floor(o/60);return`${e} minute${e>1?"s":""} ago`}if(o<86400){const e=Math.floor(o/3600);return`${e} hour${e>1?"s":""} ago`}if(o<604800){const e=Math.floor(o/86400);return`${e} day${e>1?"s":""} ago`}if(o<2592e3){const e=Math.floor(o/604800);return`${e} week${e>1?"s":""} ago`}return t.toLocaleDateString("en-US",{month:"short",day:"numeric",year:t.getFullYear()!==n.getFullYear()?"numeric":void 0})}catch(t){return"unknown time"}},getStateIcon:e=>({open:"🟢",closed:"🔴",merged:"🟣"}[e]||"❓"),getStateText:e=>({open:"Open",closed:"Closed",merged:"Merged"}[e]||"Unknown"),getMergeableIcon:e=>({clean:"✅",dirty:"⚠️",unstable:"🟡",blocked:"🚫"}[e]||"❓"),getMergeableText:e=>({clean:"Ready to merge",dirty:"Conflicts",unstable:"Checks pending",blocked:"Blocked"}[e]||"Unknown status"),getDefaultAvatar:()=>"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMTAiIGZpbGw9IiNkMWQ5ZTAiLz4KPHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxMiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI0IiB5PSI0Ij4KPHBhdGggZD0iTTYgNkM3LjY1Njg1IDYgOSA0LjY1Njg1IDkgM0M5IDEuMzQzMTUgNy42NTY4NSAwIDYgMEM0LjM0MzE1IDAgMyAxLjM0MzE1IDMgM0MzIDQuNjU2ODUgNC4zNDMxNSA2IDYgNloiIGZpbGw9IiM2MzZjNzYiLz4KPHBhdGggZD0iTTEyIDEwLjVDMTIgOC4wMTQ3MiAxMC4yMDkxIDYgOCA2SDRDMS43OTA4NiA2IDAgOC4wMTQ3MiAwIDEwLjVWMTJIMTJWMTAuNVoiIGZpbGw9IiM2MzZjNzYiLz4KPC9zdmc+Cjwvc3ZnPgo=",handleAvatarError(e){e.target.src=this.getDefaultAvatar()},openPullRequest(e){e.preventDefault();const t=this.pullRequest.html_url;t&&window.open(t,"_blank","noopener,noreferrer"),this.$emit("select",this.pullRequest)}}},vn={class:"pr-card__header"},hn={class:"pr-card__title-section"},mn={class:"pr-card__title"},gn={class:"pr-card__number"},bn={class:"pr-card__title-text"},yn={class:"pr-card__state"},_n=["aria-label"],Nn={class:"pr-state-badge__icon"},wn={class:"pr-state-badge__text"},En={class:"pr-card__meta"},kn={class:"pr-card__author"},xn=["src","alt"],Vn={class:"pr-card__author-info"},On={class:"pr-card__author-name"},Dn={class:"pr-card__timestamps"},Cn={class:"pr-card__created"},Rn={class:"pr-card__updated"},Sn={class:"pr-card__actions"},$n=["aria-label"],An={key:0,class:"pr-card__footer"},Pn={class:"pr-card__additional-info"},Bn={key:0,class:"pr-card__draft-indicator"},Mn={key:1,class:"pr-card__mergeable-state"},In={class:"mergeable-icon"},Tn={class:"mergeable-text"};const jn={name:"GitHubDashboard",components:{RepositoryCard:un,PullRequestCard:_export_sfc(fn,[["render",function(e,t,n,o,r,a){var s,i,c;return openBlock(),createElementBlock("article",{class:normalizeClass(["pr-card",`pr-card--${n.pullRequest.state}`]),role:"button",tabindex:"0",onClick:t[2]||(t[2]=(...e)=>a.openPullRequest&&a.openPullRequest(...e)),onKeydown:[t[3]||(t[3]=withKeys((...e)=>a.openPullRequest&&a.openPullRequest(...e),["enter"])),t[4]||(t[4]=withKeys(withModifiers((...e)=>a.openPullRequest&&a.openPullRequest(...e),["prevent"]),["space"]))]},[createBaseVNode("header",vn,[createBaseVNode("div",hn,[createBaseVNode("h3",mn,[createBaseVNode("span",gn,"#"+toDisplayString(n.pullRequest.number),1),createBaseVNode("span",bn,toDisplayString(n.pullRequest.title),1)]),createBaseVNode("div",yn,[createBaseVNode("span",{class:normalizeClass(["pr-state-badge",`pr-state-badge--${n.pullRequest.state}`]),"aria-label":`Pull request is ${n.pullRequest.state}`},[createBaseVNode("span",Nn,toDisplayString(a.getStateIcon(n.pullRequest.state)),1),createBaseVNode("span",wn,toDisplayString(a.getStateText(n.pullRequest.state)),1)],10,_n)])])]),createBaseVNode("div",En,[createBaseVNode("div",kn,[createBaseVNode("img",{src:(null==(s=n.pullRequest.user)?void 0:s.avatar_url)||a.getDefaultAvatar(),alt:`${(null==(i=n.pullRequest.user)?void 0:i.login)||"Unknown user"} avatar`,class:"pr-card__avatar",loading:"lazy",onError:t[0]||(t[0]=(...e)=>a.handleAvatarError&&a.handleAvatarError(...e))},null,40,xn),createBaseVNode("div",Vn,[createBaseVNode("span",On,toDisplayString((null==(c=n.pullRequest.user)?void 0:c.login)||"Unknown user"),1),createBaseVNode("div",Dn,[createBaseVNode("span",Cn," opened "+toDisplayString(a.formatDate(n.pullRequest.created_at)),1),t[5]||(t[5]=createBaseVNode("span",{class:"pr-card__separator"},"•",-1)),createBaseVNode("span",Rn," updated "+toDisplayString(a.formatDate(n.pullRequest.updated_at)),1)])])]),createBaseVNode("div",Sn,[createBaseVNode("button",{class:"pr-card__link-btn",onClick:t[1]||(t[1]=withModifiers((...e)=>a.openPullRequest&&a.openPullRequest(...e),["stop"])),"aria-label":`Open pull request #${n.pullRequest.number} on GitHub`,title:"View on GitHub"},t[6]||(t[6]=[createBaseVNode("span",{class:"link-icon"},"↗",-1)]),8,$n)])]),n.showAdditionalInfo?(openBlock(),createElementBlock("div",An,[createBaseVNode("div",Pn,[n.pullRequest.draft?(openBlock(),createElementBlock("div",Bn,t[7]||(t[7]=[createBaseVNode("span",{class:"draft-icon"},"📝",-1),createBaseVNode("span",{class:"draft-text"},"Draft",-1)]))):createCommentVNode("",!0),n.pullRequest.mergeable_state?(openBlock(),createElementBlock("div",Mn,[createBaseVNode("span",In,toDisplayString(a.getMergeableIcon(n.pullRequest.mergeable_state)),1),createBaseVNode("span",Tn,toDisplayString(a.getMergeableText(n.pullRequest.mergeable_state)),1)])):createCommentVNode("",!0)])])):createCommentVNode("",!0)],34)}],["styles",[".pr-card[data-v-fd60d6bf]{background:var(--color-canvas-default, #ffffff);border:1px solid var(--color-border-default, #d1d9e0);border-radius:var(--border-radius, 6px);padding:var(--space-3, 16px);cursor:pointer;transition:all var(--transition-duration, .2s) ease;position:relative;display:flex;flex-direction:column;gap:var(--space-3, 16px)}.pr-card[data-v-fd60d6bf]:hover{border-color:var(--color-border-muted, #d8dee4);box-shadow:var(--shadow-medium, 0 3px 6px rgba(31, 35, 40, .15));transform:translateY(-1px)}.pr-card[data-v-fd60d6bf]:focus{outline:2px solid var(--color-accent-emphasis, #0969da);outline-offset:-2px}.pr-card--open[data-v-fd60d6bf]{border-left:3px solid #1a7f37}.pr-card--closed[data-v-fd60d6bf]{border-left:3px solid #d1242f}.pr-card--merged[data-v-fd60d6bf]{border-left:3px solid #8250df}.pr-card__header[data-v-fd60d6bf]{display:flex;flex-direction:column;gap:var(--space-2, 8px)}.pr-card__title-section[data-v-fd60d6bf]{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-3, 16px)}.pr-card__title[data-v-fd60d6bf]{margin:0;font-size:var(--font-size-normal, 14px);font-weight:600;line-height:1.4;color:var(--color-fg-default, #1f2328);flex:1;min-width:0;display:flex;align-items:baseline;gap:var(--space-2, 8px)}.pr-card__number[data-v-fd60d6bf]{color:var(--color-fg-muted, #636c76);font-weight:400;flex-shrink:0}.pr-card__title-text[data-v-fd60d6bf]{color:var(--color-accent-fg, #0969da);text-decoration:none;word-break:break-word}.pr-card__title:hover .pr-card__title-text[data-v-fd60d6bf]{text-decoration:underline}.pr-card__state[data-v-fd60d6bf]{flex-shrink:0}.pr-state-badge[data-v-fd60d6bf]{display:inline-flex;align-items:center;gap:var(--space-1, 4px);padding:var(--space-1, 4px) var(--space-2, 8px);border-radius:12px;font-size:var(--font-size-small, 12px);font-weight:500;text-transform:capitalize;white-space:nowrap}.pr-state-badge--open[data-v-fd60d6bf]{background:#dafbe1;color:#1a7f37}.pr-state-badge--closed[data-v-fd60d6bf]{background:#ffebe9;color:#d1242f}.pr-state-badge--merged[data-v-fd60d6bf]{background:#fbefff;color:#8250df}.pr-state-badge__icon[data-v-fd60d6bf]{font-size:10px}.pr-card__meta[data-v-fd60d6bf]{display:flex;justify-content:space-between;align-items:center;gap:var(--space-3, 16px)}.pr-card__author[data-v-fd60d6bf]{display:flex;align-items:center;gap:var(--space-2, 8px);flex:1;min-width:0}.pr-card__avatar[data-v-fd60d6bf]{width:20px;height:20px;border-radius:50%;flex-shrink:0;background:var(--color-canvas-subtle, #f6f8fa)}.pr-card__author-info[data-v-fd60d6bf]{display:flex;flex-direction:column;gap:var(--space-1, 4px);min-width:0;flex:1}.pr-card__author-name[data-v-fd60d6bf]{font-size:var(--font-size-small, 12px);font-weight:500;color:var(--color-fg-default, #1f2328)}.pr-card__timestamps[data-v-fd60d6bf]{display:flex;align-items:center;gap:var(--space-1, 4px);font-size:var(--font-size-small, 12px);color:var(--color-fg-muted, #636c76)}.pr-card__separator[data-v-fd60d6bf]{color:var(--color-fg-subtle, #8c959f)}.pr-card__created[data-v-fd60d6bf],.pr-card__updated[data-v-fd60d6bf]{white-space:nowrap}.pr-card__actions[data-v-fd60d6bf]{display:flex;align-items:center}.pr-card__link-btn[data-v-fd60d6bf]{display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:none;border:1px solid transparent;border-radius:var(--border-radius, 6px);cursor:pointer;color:var(--color-fg-muted, #636c76);transition:all var(--transition-duration, .2s) ease}.pr-card__link-btn[data-v-fd60d6bf]:hover{background:var(--color-canvas-subtle, #f6f8fa);border-color:var(--color-border-default, #d1d9e0);color:var(--color-fg-default, #1f2328)}.pr-card__link-btn[data-v-fd60d6bf]:focus{outline:2px solid var(--color-accent-emphasis, #0969da);outline-offset:-2px}.link-icon[data-v-fd60d6bf]{font-size:var(--font-size-normal, 14px);font-weight:700}.pr-card__footer[data-v-fd60d6bf]{padding-top:var(--space-2, 8px);border-top:1px solid var(--color-border-muted, #d8dee4)}.pr-card__additional-info[data-v-fd60d6bf]{display:flex;gap:var(--space-3, 16px);align-items:center}.pr-card__draft-indicator[data-v-fd60d6bf],.pr-card__mergeable-state[data-v-fd60d6bf]{display:flex;align-items:center;gap:var(--space-1, 4px);font-size:var(--font-size-small, 12px);color:var(--color-fg-muted, #636c76)}.draft-icon[data-v-fd60d6bf],.mergeable-icon[data-v-fd60d6bf]{font-size:10px}@media (max-width: 768px){.pr-card__title-section[data-v-fd60d6bf]{flex-direction:column;align-items:stretch;gap:var(--space-2, 8px)}.pr-card__state[data-v-fd60d6bf]{align-self:flex-start}.pr-card__meta[data-v-fd60d6bf]{flex-direction:column;align-items:stretch;gap:var(--space-2, 8px)}.pr-card__actions[data-v-fd60d6bf]{align-self:flex-end}.pr-card__timestamps[data-v-fd60d6bf]{flex-direction:column;align-items:flex-start;gap:var(--space-1, 4px)}.pr-card__separator[data-v-fd60d6bf]{display:none}}@media (max-width: 480px){.pr-card[data-v-fd60d6bf]{padding:var(--space-2, 8px);gap:var(--space-2, 8px)}.pr-card__title[data-v-fd60d6bf]{font-size:var(--font-size-small, 12px);flex-direction:column;align-items:flex-start;gap:var(--space-1, 4px)}.pr-card__additional-info[data-v-fd60d6bf]{flex-direction:column;align-items:flex-start;gap:var(--space-2, 8px)}}@media (prefers-reduced-motion: reduce){.pr-card[data-v-fd60d6bf]{transition:none}.pr-card[data-v-fd60d6bf]:hover{transform:none}}@media (prefers-contrast: high){.pr-card[data-v-fd60d6bf]{border-width:2px}.pr-card[data-v-fd60d6bf]:hover{border-width:3px}.pr-state-badge[data-v-fd60d6bf]{border:1px solid currentColor}}@media (prefers-color-scheme: dark){.pr-state-badge--open[data-v-fd60d6bf]{background:#1a7f3730;color:#4ade80}.pr-state-badge--closed[data-v-fd60d6bf]{background:#d1242f30;color:#f87171}.pr-state-badge--merged[data-v-fd60d6bf]{background:#8250df30;color:#c084fc}}"]],["__scopeId","data-v-fd60d6bf"]])},props:{githubToken:{type:String,default:""},repositories:{type:Array,default:()=>[]},refreshInterval:{type:Number,default:3e5},compactView:{type:Boolean,default:!1}},setup(e){const t=ref([]),n=ref([]),o=ref(null),r=ref(!1),a=ref(!1),s=ref(null);let i=null;const loadRepositories=()=>__async(this,null,function*(){try{if(r.value=!0,s.value=null,!window.pluginAPI||!window.pluginAPI.getRepositories)throw new Error("Plugin API not available");{const e=yield window.pluginAPI.getRepositories();t.value=Array.isArray(e)?e:[]}}catch(e){s.value=e.message||"Failed to load repositories",console.error("Failed to load repositories:",e),t.value=[]}finally{r.value=!1}}),selectRepository=e=>__async(this,null,function*(){if(o.value!==e.full_name){o.value=e.full_name,n.value=[];try{if(a.value=!0,s.value=null,!window.pluginAPI||!window.pluginAPI.getPullRequests)throw new Error("Plugin API not available");{const t=yield window.pluginAPI.getPullRequests(e.full_name);n.value=Array.isArray(t)?t:[]}}catch(t){s.value=`Failed to load pull requests for ${e.full_name}: ${t.message}`,console.error("Failed to load pull requests:",t),n.value=[]}finally{a.value=!1}}}),refresh=()=>__async(this,null,function*(){if(yield loadRepositories(),o.value){const e=t.value.find(e=>e.full_name===o.value);e?yield selectRepository(e):(o.value=null,n.value=[])}});return $e(()=>{loadRepositories(),e.refreshInterval>0&&(i=setInterval(refresh,e.refreshInterval))}),Me(()=>{i&&(clearInterval(i),i=null)}),{repositories:t,pullRequests:n,selectedRepo:o,loading:r,pullRequestsLoading:a,error:s,selectRepository:selectRepository,refresh:refresh,clearError:()=>{s.value=null}}}},zn={class:"github-dashboard"},Hn={class:"dashboard-header"},Fn={class:"header-content"},Ln={class:"header-actions"},qn=["disabled"],Wn={key:0,class:"alert alert-error",role:"alert"},Un={class:"alert-content"},Gn={class:"alert-message"},Kn={class:"dashboard-content"},Jn={class:"dashboard-section repositories-section"},Zn={class:"section-header"},Yn={class:"section-title"},Qn={key:0,class:"section-count"},Xn={class:"section-content"},eo={key:0,class:"loading-state"},to={class:"skeleton-cards"},no={key:1,class:"repo-grid"},oo={key:2,class:"empty-state"},ro={key:0,class:"dashboard-section pull-requests-section"},ao={class:"section-header"},so={class:"section-title"},io={class:"section-subtitle"},co={key:0,class:"section-count"},lo={class:"section-content"},po={key:0,class:"loading-state"},uo={class:"skeleton-cards"},fo={key:1,class:"pr-list"},vo={key:2,class:"empty-state empty-state-compact"};const ho=_export_sfc(jn,[["render",function(e,t,n,o,r,a){const s=resolveComponent("RepositoryCard"),i=resolveComponent("PullRequestCard");return openBlock(),createElementBlock("div",zn,[createBaseVNode("header",Hn,[createBaseVNode("div",Fn,[t[3]||(t[3]=createBaseVNode("div",{class:"header-title"},[createBaseVNode("div",{class:"title-icon"},"🐙"),createBaseVNode("div",{class:"title-text"},[createBaseVNode("h1",null,"GitHub Dashboard"),createBaseVNode("p",{class:"subtitle"}," Monitor your repositories and pull requests ")])],-1)),createBaseVNode("div",Ln,[createBaseVNode("button",{onClick:t[0]||(t[0]=(...e)=>o.refresh&&o.refresh(...e)),disabled:o.loading,class:normalizeClass(["btn btn-primary",{"btn-loading":o.loading}])},[createBaseVNode("span",{class:normalizeClass(["btn-icon",{rotating:o.loading}])},toDisplayString(o.loading?"⟳":"↻"),3),createTextVNode(" "+toDisplayString(o.loading?"Refreshing...":"Refresh"),1)],10,qn)])])]),o.error?(openBlock(),createElementBlock("div",Wn,[t[5]||(t[5]=createBaseVNode("div",{class:"alert-icon"},"⚠️",-1)),createBaseVNode("div",Un,[t[4]||(t[4]=createBaseVNode("div",{class:"alert-title"},"Something went wrong",-1)),createBaseVNode("div",Gn,toDisplayString(o.error),1)]),createBaseVNode("button",{onClick:t[1]||(t[1]=(...e)=>o.clearError&&o.clearError(...e)),class:"alert-dismiss","aria-label":"Dismiss error"}," × ")])):createCommentVNode("",!0),createBaseVNode("div",Kn,[createBaseVNode("section",Jn,[createBaseVNode("div",Zn,[createBaseVNode("h2",Yn,[t[6]||(t[6]=createBaseVNode("span",{class:"section-icon"},"📁",-1)),t[7]||(t[7]=createTextVNode(" Repositories ",-1)),o.repositories.length>0?(openBlock(),createElementBlock("span",Qn,toDisplayString(o.repositories.length),1)):createCommentVNode("",!0)])]),createBaseVNode("div",Xn,[o.loading&&0===o.repositories.length?(openBlock(),createElementBlock("div",eo,[createBaseVNode("div",to,[(openBlock(),createElementBlock(et,null,renderList(3,e=>createBaseVNode("div",{key:e,class:"skeleton-card"},t[8]||(t[8]=[createStaticVNode('<div class="skeleton-header" data-v-09b61436><div class="skeleton-line skeleton-title" data-v-09b61436></div><div class="skeleton-line skeleton-stats" data-v-09b61436></div></div><div class="skeleton-line skeleton-description" data-v-09b61436></div><div class="skeleton-footer" data-v-09b61436><div class="skeleton-line skeleton-meta" data-v-09b61436></div></div>',3)]))),64))])])):o.repositories.length>0?(openBlock(),createElementBlock("div",no,[(openBlock(!0),createElementBlock(et,null,renderList(o.repositories,e=>(openBlock(),createBlock(s,{key:e.full_name,repository:e,selected:o.selectedRepo===e.full_name,onSelect:o.selectRepository},null,8,["repository","selected","onSelect"]))),128))])):(openBlock(),createElementBlock("div",oo,[t[9]||(t[9]=createBaseVNode("div",{class:"empty-icon"},"📂",-1)),t[10]||(t[10]=createBaseVNode("h3",{class:"empty-title"},"No repositories found",-1)),t[11]||(t[11]=createBaseVNode("p",{class:"empty-description"}," Configure your GitHub token and repositories to get started. ",-1)),createBaseVNode("button",{class:"btn btn-outline",onClick:t[2]||(t[2]=(...e)=>o.refresh&&o.refresh(...e))}," Try again ")]))])]),o.selectedRepo?(openBlock(),createElementBlock("section",ro,[createBaseVNode("div",ao,[createBaseVNode("h2",so,[t[12]||(t[12]=createBaseVNode("span",{class:"section-icon"},"🔄",-1)),t[13]||(t[13]=createTextVNode(" Pull Requests ",-1)),createBaseVNode("span",io,toDisplayString(o.selectedRepo),1),o.pullRequests.length>0?(openBlock(),createElementBlock("span",co,toDisplayString(o.pullRequests.length),1)):createCommentVNode("",!0)])]),createBaseVNode("div",lo,[o.pullRequestsLoading?(openBlock(),createElementBlock("div",po,[createBaseVNode("div",uo,[(openBlock(),createElementBlock(et,null,renderList(2,e=>createBaseVNode("div",{key:e,class:"skeleton-card skeleton-pr"},t[14]||(t[14]=[createStaticVNode('<div class="skeleton-header" data-v-09b61436><div class="skeleton-line skeleton-pr-title" data-v-09b61436></div><div class="skeleton-badge" data-v-09b61436></div></div><div class="skeleton-meta" data-v-09b61436><div class="skeleton-avatar" data-v-09b61436></div><div class="skeleton-line skeleton-author" data-v-09b61436></div></div>',2)]))),64))])])):o.pullRequests.length>0?(openBlock(),createElementBlock("div",fo,[(openBlock(!0),createElementBlock(et,null,renderList(o.pullRequests,e=>(openBlock(),createBlock(i,{key:e.number,"pull-request":e},null,8,["pull-request"]))),128))])):(openBlock(),createElementBlock("div",vo,t[15]||(t[15]=[createBaseVNode("div",{class:"empty-icon"},"✨",-1),createBaseVNode("h3",{class:"empty-title"},"No open pull requests",-1),createBaseVNode("p",{class:"empty-description"}," This repository has no open pull requests. ",-1)])))])])):createCommentVNode("",!0)])])}],["styles",["[data-v-09b61436]:root{--color-canvas-default: #ffffff;--color-canvas-subtle: #f6f8fa;--color-canvas-inset: #f6f8fa;--color-border-default: #d1d9e0;--color-border-muted: #d8dee4;--color-fg-default: #1f2328;--color-fg-muted: #636c76;--color-fg-subtle: #8c959f;--color-accent-fg: #0969da;--color-accent-emphasis: #0969da;--color-danger-fg: #d1242f;--color-success-fg: #1a7f37;--color-attention-fg: #9a6700;--space-1: 4px;--space-2: 8px;--space-3: 16px;--space-4: 24px;--space-5: 32px;--space-6: 40px;--font-size-small: 12px;--font-size-normal: 14px;--font-size-medium: 16px;--font-size-large: 20px;--font-size-xl: 24px;--border-radius: 6px;--border-radius-medium: 8px;--shadow-small: 0 1px 0 rgba(31, 35, 40, .04);--shadow-medium: 0 3px 6px rgba(31, 35, 40, .15);--shadow-large: 0 8px 24px rgba(31, 35, 40, .2);--transition-duration: .2s}.github-dashboard[data-v-09b61436]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Noto Sans,Helvetica,Arial,sans-serif;font-size:var(--font-size-normal);line-height:1.5;color:var(--color-fg-default);background:var(--color-canvas-default);min-height:400px}.dashboard-header[data-v-09b61436]{background:var(--color-canvas-default);border-bottom:1px solid var(--color-border-default);padding:var(--space-4) var(--space-4) var(--space-3);margin-bottom:var(--space-4)}.header-content[data-v-09b61436]{display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto}.header-title[data-v-09b61436]{display:flex;align-items:center;gap:var(--space-3)}.title-icon[data-v-09b61436]{font-size:var(--font-size-xl)}.title-text h1[data-v-09b61436]{margin:0;font-size:var(--font-size-large);font-weight:600;color:var(--color-fg-default)}.subtitle[data-v-09b61436]{margin:var(--space-1) 0 0;font-size:var(--font-size-small);color:var(--color-fg-muted)}.btn[data-v-09b61436]{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-3);font-size:var(--font-size-normal);font-weight:500;line-height:1.25;border:1px solid;border-radius:var(--border-radius);cursor:pointer;transition:all var(--transition-duration) ease;text-decoration:none;white-space:nowrap}.btn[data-v-09b61436]:focus{outline:2px solid var(--color-accent-fg);outline-offset:-2px}.btn-primary[data-v-09b61436]{color:#fff;background:var(--color-accent-emphasis);border-color:var(--color-accent-emphasis)}.btn-primary[data-v-09b61436]:hover:not(:disabled){background:#0860ca;border-color:#0860ca}.btn-primary[data-v-09b61436]:disabled{opacity:.6;cursor:not-allowed}.btn-outline[data-v-09b61436]{color:var(--color-accent-fg);background:var(--color-canvas-default);border-color:var(--color-border-default)}.btn-outline[data-v-09b61436]:hover:not(:disabled){background:var(--color-canvas-subtle);border-color:var(--color-border-muted)}.btn-icon[data-v-09b61436]{font-size:var(--font-size-medium);transition:transform .6s ease}.btn-icon.rotating[data-v-09b61436]{animation:spin-09b61436 1s linear infinite}@keyframes spin-09b61436{0%{transform:rotate(0)}to{transform:rotate(360deg)}}.alert[data-v-09b61436]{display:flex;align-items:flex-start;gap:var(--space-3);padding:var(--space-3);margin:0 var(--space-4) var(--space-4);border:1px solid;border-radius:var(--border-radius);position:relative}.alert-error[data-v-09b61436]{background:#fff8f8;border-color:#ffcdd2;color:var(--color-danger-fg)}.alert-icon[data-v-09b61436]{font-size:var(--font-size-medium);flex-shrink:0}.alert-content[data-v-09b61436]{flex:1}.alert-title[data-v-09b61436]{font-weight:600;margin-bottom:var(--space-1)}.alert-message[data-v-09b61436]{font-size:var(--font-size-small);color:var(--color-fg-muted)}.alert-dismiss[data-v-09b61436]{background:none;border:none;font-size:var(--font-size-large);color:var(--color-fg-muted);cursor:pointer;padding:0;line-height:1}.alert-dismiss[data-v-09b61436]:hover{color:var(--color-fg-default)}.dashboard-content[data-v-09b61436]{max-width:1200px;margin:0 auto;padding:0 var(--space-4);display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);align-items:start}@media (max-width: 1024px){.dashboard-content[data-v-09b61436]{grid-template-columns:1fr;gap:var(--space-4)}}.dashboard-section[data-v-09b61436]{background:var(--color-canvas-default)}.section-header[data-v-09b61436]{margin-bottom:var(--space-4)}.section-title[data-v-09b61436]{display:flex;align-items:center;gap:var(--space-2);margin:0;font-size:var(--font-size-medium);font-weight:600;color:var(--color-fg-default)}.section-icon[data-v-09b61436]{font-size:var(--font-size-medium)}.section-subtitle[data-v-09b61436]{font-size:var(--font-size-small);font-weight:400;color:var(--color-fg-muted);margin-left:var(--space-2)}.section-count[data-v-09b61436]{background:var(--color-canvas-subtle);color:var(--color-fg-muted);padding:var(--space-1) var(--space-2);border-radius:12px;font-size:var(--font-size-small);font-weight:500;margin-left:var(--space-2)}.repo-grid[data-v-09b61436],.pr-list[data-v-09b61436]{display:grid;gap:var(--space-3)}.loading-state[data-v-09b61436]{padding:var(--space-2) 0}.skeleton-cards[data-v-09b61436]{display:grid;gap:var(--space-3)}.skeleton-card[data-v-09b61436]{background:var(--color-canvas-default);border:1px solid var(--color-border-default);border-radius:var(--border-radius);padding:var(--space-3)}.skeleton-header[data-v-09b61436]{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3)}.skeleton-footer[data-v-09b61436]{margin-top:var(--space-3)}.skeleton-meta[data-v-09b61436]{display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-3)}.skeleton-line[data-v-09b61436]{background:var(--color-canvas-subtle);border-radius:3px;animation:skeleton-loading-09b61436 1.2s ease-in-out infinite}.skeleton-title[data-v-09b61436]{height:16px;width:60%}.skeleton-stats[data-v-09b61436]{height:12px;width:80px}.skeleton-description[data-v-09b61436]{height:14px;width:85%}.skeleton-meta[data-v-09b61436]{height:12px;width:50%}.skeleton-pr-title[data-v-09b61436]{height:16px;width:70%}.skeleton-author[data-v-09b61436]{height:12px;width:60px}.skeleton-badge[data-v-09b61436]{height:20px;width:50px;border-radius:10px}.skeleton-avatar[data-v-09b61436]{width:16px;height:16px;border-radius:50%;flex-shrink:0}@keyframes skeleton-loading-09b61436{0%{opacity:1}50%{opacity:.4}to{opacity:1}}.empty-state[data-v-09b61436]{text-align:center;padding:var(--space-6) var(--space-4)}.empty-state-compact[data-v-09b61436]{padding:var(--space-5) var(--space-4)}.empty-icon[data-v-09b61436]{font-size:48px;margin-bottom:var(--space-4);opacity:.6}.empty-title[data-v-09b61436]{margin:0 0 var(--space-2) 0;font-size:var(--font-size-medium);font-weight:600;color:var(--color-fg-default)}.empty-description[data-v-09b61436]{margin:0 0 var(--space-4) 0;font-size:var(--font-size-normal);color:var(--color-fg-muted);line-height:1.4}@media (max-width: 768px){.header-content[data-v-09b61436]{flex-direction:column;align-items:stretch;gap:var(--space-3)}.dashboard-content[data-v-09b61436]{padding:0 var(--space-3)}.section-title[data-v-09b61436]{flex-wrap:wrap}.section-subtitle[data-v-09b61436]{margin-left:0;margin-top:var(--space-1)}}@media (max-width: 480px){.dashboard-header[data-v-09b61436]{padding:var(--space-3)}.dashboard-content[data-v-09b61436]{padding:0 var(--space-2);gap:var(--space-3)}}"]],["__scopeId","data-v-09b61436"]]);class GitHubDashboardElement extends HTMLElement{constructor(){super(),this.app=null,this.isConnected=!1,this.shadow=null,this.cleanup=new Set}connectedCallback(){if(!this.isConnected)try{this.shadow=this.attachShadow({mode:"open"});const e=document.createElement("div");e.className="github-dashboard-root",this.shadow.appendChild(e);const t=document.createElement("style");t.textContent="\n        :host {\n          display: block;\n          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;\n          font-size: 14px;\n          line-height: 1.5;\n          color: #1f2328;\n        }\n\n        * {\n          box-sizing: border-box;\n        }\n\n        .github-dashboard-root {\n          min-height: 400px;\n          background: #ffffff;\n        }\n      ",this.shadow.appendChild(t),this.setupPluginAPI(),this.app=createApp(ho,((e,t)=>{for(var a in t||(t={}))o.call(t,a)&&__defNormalProp(e,a,t[a]);if(n)for(var a of n(t))r.call(t,a)&&__defNormalProp(e,a,t[a]);return e})({},this.getPropsFromAttributes())),this.app.config.errorHandler=(e,t,n)=>{console.error("GitHub Dashboard Error:",e,n)},this.app.mount(e),this.isConnected=!0,this.setupCleanup()}catch(e){console.error("Failed to initialize GitHub Dashboard:",e),this.renderError(e.message)}}disconnectedCallback(){this.cleanup.forEach(e=>{try{e()}catch(t){console.warn("Cleanup error:",t)}}),this.cleanup.clear(),this.app&&(this.app.unmount(),this.app=null),this.isConnected=!1}setupPluginAPI(){window.pluginAPI||(window.pluginAPI={}),window.pluginAPI.getRepositories||(window.pluginAPI.getRepositories=()=>__async(this,null,function*(){return[{name:"delve",full_name:"PortableSheep/delve",description:"Advanced plugin system for Go applications",stargazers_count:1250,forks_count:180,open_issues_count:23,language:"Go",updated_at:(new Date).toISOString(),html_url:"https://github.com/PortableSheep/delve"}]})),window.pluginAPI.getPullRequests||(window.pluginAPI.getPullRequests=e=>__async(this,null,function*(){return[{number:42,title:"Add new dashboard features",state:"open",created_at:new Date(Date.now()-864e5).toISOString(),updated_at:new Date(Date.now()-36e5).toISOString(),html_url:`https://github.com/${e}/pull/42`,user:{login:"developer",avatar_url:"https://github.com/identicons/developer.png"}}]}))}setupCleanup(){const e=window.setInterval,t=window.setTimeout,n=new Set,o=new Set;window.setInterval=(t,o)=>{const r=e(t,o);return n.add(r),r},window.setTimeout=(e,n)=>{const r=t(e,n);return o.add(r),r},this.cleanup.add(()=>{n.forEach(e=>clearInterval(e)),o.forEach(e=>clearTimeout(e)),n.clear(),o.clear()}),this.cleanup.add(()=>{window.setInterval=e,window.setTimeout=t})}getPropsFromAttributes(){const e={};if(this.hasAttribute("github-token")&&(e.githubToken=this.getAttribute("github-token")),this.hasAttribute("repositories"))try{e.repositories=JSON.parse(this.getAttribute("repositories"))}catch(mo){console.warn("Invalid repositories attribute:",mo)}return this.hasAttribute("refresh-interval")&&(e.refreshInterval=parseInt(this.getAttribute("refresh-interval"),10)),this.hasAttribute("compact-view")&&(e.compactView="true"===this.getAttribute("compact-view")),e}renderError(e){this.shadow&&(this.shadow.innerHTML=`\n        <style>\n          .error-container {\n            padding: 20px;\n            background: #fff8f8;\n            border: 1px solid #ffebee;\n            border-radius: 6px;\n            color: #d73a49;\n            text-align: center;\n          }\n          .error-icon {\n            font-size: 48px;\n            margin-bottom: 16px;\n          }\n          .error-message {\n            font-size: 16px;\n            margin-bottom: 8px;\n          }\n          .error-details {\n            font-size: 12px;\n            color: #586069;\n          }\n        </style>\n        <div class="error-container">\n          <div class="error-icon">⚠️</div>\n          <div class="error-message">Failed to load GitHub Dashboard</div>\n          <div class="error-details">${e}</div>\n        </div>\n      `)}static get observedAttributes(){return["github-token","repositories","refresh-interval","compact-view"]}attributeChangedCallback(e,t,n){t!==n&&this.isConnected&&this.app&&(this.getPropsFromAttributes(),console.log("Attribute changed:",e,"from",t,"to",n))}}function initializeComponent(){customElements.get("github-dashboard")||(customElements.define("github-dashboard",GitHubDashboardElement),console.log("GitHub Dashboard web component registered"))}if("undefined"!=typeof window)if(window.Vue)initializeComponent();else{const e=document.createElement("script");e.src="https://unpkg.com/vue@3.4.0/dist/vue.global.js",e.onload=()=>{console.log("Vue loaded from CDN"),initializeComponent()},e.onerror=()=>{console.error("Failed to load Vue from CDN")},document.head.appendChild(e)}else console.warn("GitHub Dashboard component requires a browser environment");return e.GitHubDashboardElement=GitHubDashboardElement,e.default=GitHubDashboardElement,Object.defineProperties(e,{__esModule:{value:!0},[Symbol.toStringTag]:{value:"Module"}}),e}({});
+
+
+      // Mark as registered
+      isComponentRegistered = true;
+      console.log('[GitHub Dashboard] Component registered successfully');
+
+      // Process any pending initializations
+      pendingInitializations.forEach(callback => {
+        try {
+          callback();
+        } catch (error) {
+          console.error('[GitHub Dashboard] Pending initialization failed:', error);
+        }
+      });
+      pendingInitializations = [];
+
+      return Promise.resolve();
+    } catch (error) {
+      console.error('[GitHub Dashboard] Component registration failed:', error);
+      return Promise.reject(error);
+    }
+  }
+
+  // Initialize the component
+  async function initialize() {
+    try {
+      console.log('[GitHub Dashboard] Initializing web component...');
+
+      // Load Vue if needed
+      if (!isVueLoaded) {
+        await loadVue();
+      }
+
+      // Register the component
+      await registerComponent();
+
+      console.log('[GitHub Dashboard] Component initialization complete');
+    } catch (error) {
+      handleError(error, 'initialization');
+      throw error;
+    }
+  }
+
+  // Plugin API setup
+  function setupPluginAPI() {
+    if (!global.pluginAPI) {
+      global.pluginAPI = {};
     }
 
-    function initializeComponent() {
-        const { createApp, defineComponent, ref, reactive, computed, onMounted, onUnmounted, watch } = Vue;
+    // Default implementations for development/testing
+    if (!global.pluginAPI.getRepositories) {
+      global.pluginAPI.getRepositories = async () => {
+        console.log('[GitHub Dashboard] Using mock repository data');
+        return [
+          {
+            name: 'delve',
+            full_name: 'PortableSheep/delve',
+            description: 'Advanced plugin system for Go applications - Configure your GitHub token for real data',
+            stargazers_count: 1250,
+            forks_count: 180,
+            open_issues_count: 23,
+            language: 'Go',
+            updated_at: new Date(Date.now() - 86400000).toISOString(),
+            html_url: 'https://github.com/PortableSheep/delve',
+          },
+          {
+            name: 'delve-plugins',
+            full_name: 'PortableSheep/delve-plugins',
+            description: 'Official plugin collection for Delve',
+            stargazers_count: 89,
+            forks_count: 34,
+            open_issues_count: 8,
+            language: 'Go',
+            updated_at: new Date(Date.now() - 3600000).toISOString(),
+            html_url: 'https://github.com/PortableSheep/delve-plugins',
+          }
+        ];
+      };
+    }
 
-        // Resource cleanup manager
-        class ResourceManager {
-            constructor() {
-                this.cleanupHandlers = new Set();
-                this.isShuttingDown = false;
-                this.intervals = new Set();
-                this.timeouts = new Set();
-                this.eventListeners = new Map();
-                this.abortControllers = new Set();
-            }
-
-            onCleanup(handler) {
-                if (typeof handler === 'function') {
-                    this.cleanupHandlers.add(handler);
-                }
-            }
-
-            setManagedInterval(handler, delay) {
-                const id = setInterval(handler, delay);
-                this.intervals.add(id);
-                return id;
-            }
-
-            setManagedTimeout(handler, delay) {
-                const id = setTimeout(handler, delay);
-                this.timeouts.add(id);
-                return id;
-            }
-
-            addManagedEventListener(target, event, handler, options = {}) {
-                target.addEventListener(event, handler, options);
-                if (!this.eventListeners.has(target)) {
-                    this.eventListeners.set(target, []);
-                }
-                this.eventListeners.get(target).push({ event, handler, options });
-            }
-
-            managedFetch(url, options = {}) {
-                const controller = new AbortController();
-                this.abortControllers.add(controller);
-
-                return fetch(url, {
-                    ...options,
-                    signal: controller.signal
-                }).finally(() => {
-                    this.abortControllers.delete(controller);
-                });
-            }
-
-            cleanup() {
-                if (this.isShuttingDown) return;
-                this.isShuttingDown = true;
-
-                console.log('[GitHub Dashboard] Starting cleanup');
-
-                // Clear intervals
-                this.intervals.forEach(id => clearInterval(id));
-                this.intervals.clear();
-
-                // Clear timeouts
-                this.timeouts.forEach(id => clearTimeout(id));
-                this.timeouts.clear();
-
-                // Remove event listeners
-                this.eventListeners.forEach((listeners, target) => {
-                    listeners.forEach(({ event, handler, options }) => {
-                        target.removeEventListener(event, handler, options);
-                    });
-                });
-                this.eventListeners.clear();
-
-                // Abort pending requests
-                this.abortControllers.forEach(controller => {
-                    if (!controller.signal.aborted) {
-                        controller.abort();
-                    }
-                });
-                this.abortControllers.clear();
-
-                // Run custom cleanup handlers
-                this.cleanupHandlers.forEach(handler => {
-                    try {
-                        handler();
-                    } catch (error) {
-                        console.warn('[GitHub Dashboard] Error in cleanup handler:', error);
-                    }
-                });
-                this.cleanupHandlers.clear();
-
-                console.log('[GitHub Dashboard] Cleanup completed');
-            }
-        }
-
-        const resourceManager = new ResourceManager();
-
-        // GitHub API helper
-        class GitHubAPI {
-            constructor() {
-                this.baseURL = 'https://api.github.com';
-                this.rateLimitRemaining = 60;
-                this.rateLimitReset = Date.now();
-            }
-
-            async makeRequest(endpoint, options = {}) {
-                const token = await this.getStoredToken();
-                const headers = {
-                    'Accept': 'application/vnd.github.v3+json',
-                    'User-Agent': 'Delve-GitHub-Dashboard/1.0',
-                    ...options.headers
-                };
-
-                if (token) {
-                    headers['Authorization'] = `token ${token}`;
-                }
-
-                try {
-                    const response = await resourceManager.managedFetch(`${this.baseURL}${endpoint}`, {
-                        ...options,
-                        headers
-                    });
-
-                    // Update rate limit info
-                    this.rateLimitRemaining = parseInt(response.headers.get('X-RateLimit-Remaining') || '60');
-                    this.rateLimitReset = parseInt(response.headers.get('X-RateLimit-Reset') || Date.now() / 1000) * 1000;
-
-                    if (!response.ok) {
-                        throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
-                    }
-
-                    return await response.json();
-                } catch (error) {
-                    if (error.name === 'AbortError') {
-                        console.log('Request aborted during cleanup');
-                        return null;
-                    }
-                    throw error;
-                }
-            }
-
-            async getStoredToken() {
-                try {
-                    if (window.delvePlugin && window.delvePlugin.loadConfig) {
-                        const config = await window.delvePlugin.loadConfig('dashboard_settings', '1.0.0');
-                        return config?.github_token || '';
-                    }
-                    return localStorage.getItem('github_dashboard_token') || '';
-                } catch (error) {
-                    console.warn('Failed to load GitHub token:', error);
-                    return '';
-                }
-            }
-
-            async getRepositories(repos = []) {
-                if (!repos.length) {
-                    // Return demo repositories if none configured
-                    return [
-                        {
-                            name: 'delve',
-                            full_name: 'PortableSheep/delve',
-                            description: 'Advanced debugging tool for Go',
-                            stargazers_count: 1500,
-                            forks_count: 200,
-                            open_issues_count: 45,
-                            language: 'Go',
-                            updated_at: new Date().toISOString(),
-                            html_url: 'https://github.com/PortableSheep/delve'
-                        }
-                    ];
-                }
-
-                const repositories = [];
-                for (const repoName of repos) {
-                    try {
-                        const repo = await this.makeRequest(`/repos/${repoName}`);
-                        if (repo) repositories.push(repo);
-                    } catch (error) {
-                        console.warn(`Failed to fetch repository ${repoName}:`, error);
-                    }
-                }
-                return repositories;
-            }
-
-            async getPullRequests(repoName) {
-                try {
-                    return await this.makeRequest(`/repos/${repoName}/pulls?state=open`);
-                } catch (error) {
-                    console.warn(`Failed to fetch pull requests for ${repoName}:`, error);
-                    return [];
-                }
-            }
-
-            async getUserInfo() {
-                try {
-                    return await this.makeRequest('/user');
-                } catch (error) {
-                    console.warn('Failed to fetch user info:', error);
-                    return null;
-                }
-            }
-        }
-
-        const githubAPI = new GitHubAPI();
-
-        // Main component
-        const GitHubDashboardComponent = defineComponent({
-            name: 'GitHubDashboard',
-            setup() {
-                // Reactive state
-                const repositories = ref([]);
-                const selectedRepo = ref(null);
-                const pullRequests = ref([]);
-                const loading = ref(false);
-                const prLoading = ref(false);
-                const error = ref('');
-                const user = ref(null);
-                const config = reactive({
-                    githubToken: '',
-                    repositories: [],
-                    refreshInterval: 300,
-                    showStars: true,
-                    showForks: true,
-                    showIssues: true
-                });
-
-                // Computed properties
-                const hasToken = computed(() => config.githubToken.length > 0);
-                const rateLimitInfo = computed(() => ({
-                    remaining: githubAPI.rateLimitRemaining,
-                    resetTime: new Date(githubAPI.rateLimitReset).toLocaleTimeString()
-                }));
-
-                // Load stored configuration
-                const loadConfig = async () => {
-                    try {
-                        if (window.delvePlugin && window.delvePlugin.loadConfig) {
-                            const storedConfig = await window.delvePlugin.loadConfig('dashboard_settings', '1.0.0');
-                            if (storedConfig) {
-                                Object.assign(config, storedConfig);
-                            }
-                        } else {
-                            // Fallback to localStorage
-                            const stored = localStorage.getItem('github_dashboard_config');
-                            if (stored) {
-                                const parsed = JSON.parse(stored);
-                                Object.assign(config, parsed);
-                            }
-                        }
-                    } catch (err) {
-                        console.warn('Failed to load config:', err);
-                    }
-                };
-
-                // Save configuration
-                const saveConfig = async () => {
-                    try {
-                        if (window.delvePlugin && window.delvePlugin.storeConfig) {
-                            await window.delvePlugin.storeConfig('dashboard_settings', config, '1.0.0');
-                        } else {
-                            localStorage.setItem('github_dashboard_config', JSON.stringify(config));
-                        }
-                    } catch (err) {
-                        console.warn('Failed to save config:', err);
-                    }
-                };
-
-                // Load repositories
-                const loadRepositories = async () => {
-                    if (loading.value) return;
-
-                    try {
-                        loading.value = true;
-                        error.value = '';
-
-                        const repos = await githubAPI.getRepositories(config.repositories);
-                        repositories.value = repos || [];
-
-                        if (hasToken.value && !user.value) {
-                            user.value = await githubAPI.getUserInfo();
-                        }
-                    } catch (err) {
-                        error.value = err.message;
-                        console.error('Failed to load repositories:', err);
-                    } finally {
-                        loading.value = false;
-                    }
-                };
-
-                // Load pull requests for selected repository
-                const loadPullRequests = async (repo) => {
-                    if (prLoading.value) return;
-
-                    try {
-                        prLoading.value = true;
-                        selectedRepo.value = repo;
-
-                        const prs = await githubAPI.getPullRequests(repo.full_name);
-                        pullRequests.value = prs || [];
-                    } catch (err) {
-                        error.value = err.message;
-                        console.error('Failed to load pull requests:', err);
-                        pullRequests.value = [];
-                    } finally {
-                        prLoading.value = false;
-                    }
-                };
-
-                // Refresh all data
-                const refreshAll = async () => {
-                    await loadRepositories();
-                    if (selectedRepo.value) {
-                        await loadPullRequests(selectedRepo.value);
-                    }
-                };
-
-                // Format date helper
-                const formatDate = (dateString) => {
-                    const date = new Date(dateString);
-                    const now = new Date();
-                    const diff = now - date;
-                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-                    if (days === 0) return 'Today';
-                    if (days === 1) return 'Yesterday';
-                    if (days < 7) return `${days} days ago`;
-                    return date.toLocaleDateString();
-                };
-
-                // Format number helper
-                const formatNumber = (num) => {
-                    if (num >= 1000) {
-                        return (num / 1000).toFixed(1) + 'k';
-                    }
-                    return num.toString();
-                };
-
-                // Setup auto-refresh
-                let refreshTimer = null;
-                const setupAutoRefresh = () => {
-                    if (refreshTimer) {
-                        clearInterval(refreshTimer);
-                    }
-                    if (config.refreshInterval > 0) {
-                        refreshTimer = resourceManager.setManagedInterval(refreshAll, config.refreshInterval * 1000);
-                    }
-                };
-
-                // Watch for config changes
-                watch(() => config.refreshInterval, setupAutoRefresh);
-                watch(() => config.repositories, loadRepositories, { deep: true });
-                watch(config, saveConfig, { deep: true });
-
-                // Lifecycle hooks
-                onMounted(async () => {
-                    console.log('GitHub Dashboard mounted');
-                    await loadConfig();
-                    await loadRepositories();
-                    setupAutoRefresh();
-                });
-
-                onUnmounted(() => {
-                    console.log('GitHub Dashboard unmounted');
-                    if (refreshTimer) {
-                        clearInterval(refreshTimer);
-                    }
-                });
-
-                // Setup cleanup
-                resourceManager.onCleanup(() => {
-                    if (refreshTimer) {
-                        clearInterval(refreshTimer);
-                    }
-                });
-
-                return {
-                    repositories,
-                    selectedRepo,
-                    pullRequests,
-                    loading,
-                    prLoading,
-                    error,
-                    user,
-                    config,
-                    hasToken,
-                    rateLimitInfo,
-                    loadRepositories,
-                    loadPullRequests,
-                    refreshAll,
-                    formatDate,
-                    formatNumber,
-                    saveConfig
-                };
+    if (!global.pluginAPI.getPullRequests) {
+      global.pluginAPI.getPullRequests = async (repoName) => {
+        console.log(`[GitHub Dashboard] Using mock PR data for ${repoName}`);
+        return [
+          {
+            number: 42,
+            title: 'Add enhanced GitHub dashboard features',
+            state: 'open',
+            created_at: new Date(Date.now() - 86400000).toISOString(),
+            updated_at: new Date(Date.now() - 3600000).toISOString(),
+            html_url: `https://github.com/${repoName}/pull/42`,
+            user: {
+              login: 'developer',
+              avatar_url: 'https://github.com/identicons/developer.png',
             },
-
-            template: `
-                <div class="github-dashboard">
-                    <div class="dashboard-header">
-                        <div class="header-left">
-                            <h1 class="dashboard-title">
-                                <span class="icon">🐙</span>
-                                GitHub Dashboard
-                            </h1>
-                            <div v-if="user" class="user-info">
-                                Welcome, {{ user.login }}
-                            </div>
-                        </div>
-                        <div class="header-right">
-                            <div class="rate-limit" v-if="hasToken">
-                                API: {{ rateLimitInfo.remaining }}/5000
-                                <small>Reset: {{ rateLimitInfo.resetTime }}</small>
-                            </div>
-                            <button @click="refreshAll" :disabled="loading" class="refresh-btn">
-                                <span class="btn-icon" :class="{ spinning: loading }">🔄</span>
-                                Refresh
-                            </button>
-                        </div>
-                    </div>
-
-                    <div v-if="error" class="error-message">
-                        <span class="error-icon">⚠️</span>
-                        {{ error }}
-                        <button @click="error = ''" class="error-close">×</button>
-                    </div>
-
-                    <div v-if="!hasToken" class="setup-notice">
-                        <div class="notice-content">
-                            <h3>🔑 Setup Required</h3>
-                            <p>Configure your GitHub token in settings to access real repository data.</p>
-                            <p>Currently showing demo data.</p>
-                        </div>
-                    </div>
-
-                    <div class="dashboard-content">
-                        <div class="repositories-section">
-                            <div class="section-header">
-                                <h2>Repositories</h2>
-                                <span class="repo-count">{{ repositories.length }}</span>
-                            </div>
-
-                            <div v-if="loading && repositories.length === 0" class="loading-state">
-                                <div class="loading-spinner"></div>
-                                <p>Loading repositories...</p>
-                            </div>
-
-                            <div v-else class="repositories-grid">
-                                <div
-                                    v-for="repo in repositories"
-                                    :key="repo.full_name"
-                                    @click="loadPullRequests(repo)"
-                                    class="repository-card"
-                                    :class="{ active: selectedRepo && selectedRepo.full_name === repo.full_name }"
-                                >
-                                    <div class="repo-header">
-                                        <h3 class="repo-name">{{ repo.name }}</h3>
-                                        <span class="repo-language" v-if="repo.language">{{ repo.language }}</span>
-                                    </div>
-
-                                    <p class="repo-description" v-if="repo.description">
-                                        {{ repo.description }}
-                                    </p>
-
-                                    <div class="repo-stats">
-                                        <span v-if="config.showStars" class="stat">
-                                            <span class="stat-icon">⭐</span>
-                                            {{ formatNumber(repo.stargazers_count) }}
-                                        </span>
-                                        <span v-if="config.showForks" class="stat">
-                                            <span class="stat-icon">🍴</span>
-                                            {{ formatNumber(repo.forks_count) }}
-                                        </span>
-                                        <span v-if="config.showIssues" class="stat">
-                                            <span class="stat-icon">🐛</span>
-                                            {{ repo.open_issues_count }}
-                                        </span>
-                                    </div>
-
-                                    <div class="repo-footer">
-                                        <span class="update-time">Updated {{ formatDate(repo.updated_at) }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div v-if="selectedRepo" class="pull-requests-section">
-                            <div class="section-header">
-                                <h2>Pull Requests</h2>
-                                <span class="repo-name">{{ selectedRepo.full_name }}</span>
-                            </div>
-
-                            <div v-if="prLoading" class="loading-state">
-                                <div class="loading-spinner"></div>
-                                <p>Loading pull requests...</p>
-                            </div>
-
-                            <div v-else-if="pullRequests.length === 0" class="empty-state">
-                                <div class="empty-icon">📝</div>
-                                <p>No open pull requests</p>
-                            </div>
-
-                            <div v-else class="pull-requests-list">
-                                <div
-                                    v-for="pr in pullRequests"
-                                    :key="pr.number"
-                                    class="pull-request-card"
-                                >
-                                    <div class="pr-header">
-                                        <div class="pr-number">#{{ pr.number }}</div>
-                                        <div class="pr-state" :class="pr.state">{{ pr.state }}</div>
-                                    </div>
-
-                                    <h3 class="pr-title">
-                                        <a :href="pr.html_url" target="_blank" rel="noopener">
-                                            {{ pr.title }}
-                                        </a>
-                                    </h3>
-
-                                    <div class="pr-meta">
-                                        <div class="pr-author">
-                                            <img
-                                                :src="pr.user.avatar_url"
-                                                :alt="pr.user.login"
-                                                class="author-avatar"
-                                            />
-                                            <span>{{ pr.user.login }}</span>
-                                        </div>
-                                        <div class="pr-dates">
-                                            <span>Created {{ formatDate(pr.created_at) }}</span>
-                                            <span>Updated {{ formatDate(pr.updated_at) }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `
-        });
-
-        // Component styles with theme inheritance
-        const styles = `
-            .github-dashboard {
-                max-width: 100%;
-                padding: var(--spacing-lg, 1.5rem);
-                font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif);
-                background-color: var(--bg-color, #ffffff);
-                color: var(--text-color, #24292f);
-                border-radius: var(--border-radius, 8px);
-            }
-
-            .dashboard-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                margin-bottom: var(--spacing-lg, 1.5rem);
-                padding-bottom: var(--spacing-md, 1rem);
-                border-bottom: 1px solid var(--border-color, #d0d7de);
-            }
-
-            .header-left .dashboard-title {
-                display: flex;
-                align-items: center;
-                gap: var(--spacing-sm, 0.5rem);
-                margin: 0 0 var(--spacing-xs, 0.25rem) 0;
-                font-size: var(--font-size-xl, 1.5rem);
-                font-weight: 600;
-                color: var(--text-color, #24292f);
-            }
-
-            .header-left .user-info {
-                font-size: var(--font-size-sm, 0.875rem);
-                color: var(--muted-color, #656d76);
-            }
-
-            .header-right {
-                display: flex;
-                align-items: center;
-                gap: var(--spacing-md, 1rem);
-            }
-
-            .rate-limit {
-                font-size: var(--font-size-sm, 0.875rem);
-                color: var(--muted-color, #656d76);
-                text-align: right;
-            }
-
-            .rate-limit small {
-                display: block;
-                font-size: var(--font-size-xs, 0.75rem);
-            }
-
-            .refresh-btn {
-                display: flex;
-                align-items: center;
-                gap: var(--spacing-xs, 0.25rem);
-                padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
-                background: var(--primary-color, #0969da);
-                color: white;
-                border: none;
-                border-radius: var(--border-radius, 6px);
-                cursor: pointer;
-                font-size: var(--font-size-sm, 0.875rem);
-                font-weight: 500;
-                transition: background-color 0.2s ease;
-            }
-
-            .refresh-btn:hover:not(:disabled) {
-                background: var(--primary-color-hover, #0860ca);
-            }
-
-            .refresh-btn:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-            }
-
-            .btn-icon.spinning {
-                animation: spin 1s linear infinite;
-            }
-
-            @keyframes spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-            }
-
-            .error-message {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                background: var(--error-bg, #fff8f6);
-                color: var(--error-color, #cf222e);
-                padding: var(--spacing-md, 1rem);
-                border-radius: var(--border-radius, 6px);
-                border: 1px solid var(--error-border, #ffcecb);
-                margin-bottom: var(--spacing-lg, 1.5rem);
-            }
-
-            .error-close {
-                background: none;
-                border: none;
-                font-size: 1.2rem;
-                cursor: pointer;
-                color: var(--error-color, #cf222e);
-            }
-
-            .setup-notice {
-                background: var(--info-bg, #ddf4ff);
-                border: 1px solid var(--info-border, #54aeff);
-                border-radius: var(--border-radius, 6px);
-                padding: var(--spacing-lg, 1.5rem);
-                margin-bottom: var(--spacing-lg, 1.5rem);
-            }
-
-            .setup-notice h3 {
-                margin: 0 0 var(--spacing-sm, 0.5rem) 0;
-                color: var(--info-color, #0969da);
-            }
-
-            .setup-notice p {
-                margin: var(--spacing-xs, 0.25rem) 0;
-                color: var(--info-text, #0969da);
-            }
-
-            .dashboard-content {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: var(--spacing-xl, 2rem);
-            }
-
-            .section-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: var(--spacing-md, 1rem);
-            }
-
-            .section-header h2 {
-                margin: 0;
-                font-size: var(--font-size-lg, 1.25rem);
-                font-weight: 600;
-                color: var(--text-color, #24292f);
-            }
-
-            .repo-count {
-                background: var(--muted-bg, #f6f8fa);
-                color: var(--muted-color, #656d76);
-                padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
-                border-radius: var(--border-radius-sm, 4px);
-                font-size: var(--font-size-sm, 0.875rem);
-            }
-
-            .loading-state, .empty-state {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                padding: var(--spacing-xl, 2rem);
-                color: var(--muted-color, #656d76);
-            }
-
-            .loading-spinner {
-                width: 24px;
-                height: 24px;
-                border: 3px solid var(--border-color, #d0d7de);
-                border-top: 3px solid var(--primary-color, #0969da);
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-                margin-bottom: var(--spacing-md, 1rem);
-            }
-
-            .empty-state .empty-icon {
-                font-size: 3rem;
-                margin-bottom: var(--spacing-md, 1rem);
-            }
-
-            .repositories-grid {
-                display: flex;
-                flex-direction: column;
-                gap: var(--spacing-md, 1rem);
-            }
-
-            .repository-card {
-                padding: var(--spacing-md, 1rem);
-                border: 1px solid var(--border-color, #d0d7de);
-                border-radius: var(--border-radius, 6px);
-                background: var(--card-bg, #ffffff);
-                cursor: pointer;
-                transition: all 0.2s ease;
-            }
-
-            .repository-card:hover {
-                border-color: var(--primary-color, #0969da);
-                box-shadow: 0 2px 4px var(--shadow-color, rgba(0, 0, 0, 0.1));
-            }
-
-            .repository-card.active {
-                border-color: var(--primary-color, #0969da);
-                background: var(--primary-bg, #f6f8ff);
-            }
-
-            .repo-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: var(--spacing-sm, 0.5rem);
-            }
-
-            .repo-name {
-                margin: 0;
-                font-size: var(--font-size-md, 1rem);
-                font-weight: 600;
-                color: var(--text-color, #24292f);
-            }
-
-            .repo-language {
-                background: var(--muted-bg, #f6f8fa);
-                color: var(--muted-color, #656d76);
-                padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
-                border-radius: var(--border-radius-sm, 4px);
-                font-size: var(--font-size-xs, 0.75rem);
-            }
-
-            .repo-description {
-                margin: 0 0 var(--spacing-md, 1rem) 0;
-                font-size: var(--font-size-sm, 0.875rem);
-                color: var(--muted-color, #656d76);
-                line-height: 1.4;
-            }
-
-            .repo-stats {
-                display: flex;
-                gap: var(--spacing-md, 1rem);
-                margin-bottom: var(--spacing-sm, 0.5rem);
-            }
-
-            .stat {
-                display: flex;
-                align-items: center;
-                gap: var(--spacing-xs, 0.25rem);
-                font-size: var(--font-size-sm, 0.875rem);
-                color: var(--muted-color, #656d76);
-            }
-
-            .repo-footer {
-                padding-top: var(--spacing-sm, 0.5rem);
-                border-top: 1px solid var(--border-color-light, #f6f8fa);
-            }
-
-            .update-time {
-                font-size: var(--font-size-xs, 0.75rem);
-                color: var(--muted-color, #656d76);
-            }
-
-            .pull-requests-list {
-                display: flex;
-                flex-direction: column;
-                gap: var(--spacing-md, 1rem);
-            }
-
-            .pull-request-card {
-                padding: var(--spacing-md, 1rem);
-                border: 1px solid var(--border-color, #d0d7de);
-                border-radius: var(--border-radius, 6px);
-                background: var(--card-bg, #ffffff);
-            }
-
-            .pr-header {
-                display: flex;
-                align-items: center;
-                gap: var(--spacing-sm, 0.5rem);
-                margin-bottom: var(--spacing-sm, 0.5rem);
-            }
-
-            .pr-number {
-                font-size: var(--font-size-sm, 0.875rem);
-                font-weight: 600;
-                color: var(--muted-color, #656d76);
-            }
-
-            .pr-state {
-                padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
-                border-radius: var(--border-radius-sm, 4px);
-                font-size: var(--font-size-xs, 0.75rem);
-                font-weight: 500;
-                text-transform: uppercase;
-            }
-
-            .pr-state.open {
-                background: var(--success-bg, #dcfce7);
-                color: var(--success-color, #166534);
-            }
-
-            .pr-title {
-                margin: 0 0 var(--spacing-md, 1rem) 0;
-                font-size: var(--font-size-md, 1rem);
-                font-weight: 500;
-                line-height: 1.4;
-            }
-
-            .pr-title a {
-                color: var(--text-color, #24292f);
-                text-decoration: none;
-            }
-
-            .pr-title a:hover {
-                color: var(--primary-color, #0969da);
-                text-decoration: underline;
-            }
-
-            .pr-meta {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                font-size: var(--font-size-sm, 0.875rem);
-                color: var(--muted-color, #656d76);
-            }
-
-            .pr-author {
-                display: flex;
-                align-items: center;
-                gap: var(--spacing-sm, 0.5rem);
-            }
-
-            .author-avatar {
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-            }
-
-            .pr-dates {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-                gap: var(--spacing-xs, 0.25rem);
-            }
-
-            @media (max-width: 768px) {
-                .github-dashboard {
-                    padding: var(--spacing-md, 1rem);
-                }
-
-                .dashboard-header {
-                    flex-direction: column;
-                    gap: var(--spacing-md, 1rem);
-                    align-items: stretch;
-                }
-
-                .header-right {
-                    justify-content: space-between;
-                }
-
-                .dashboard-content {
-                    grid-template-columns: 1fr;
-                    gap: var(--spacing-lg, 1.5rem);
-                }
-
-                .pr-meta {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: var(--spacing-sm, 0.5rem);
-                }
-
-                .pr-dates {
-                    align-items: flex-start;
-                }
-            }
-        `;
-
-        // Create and register the custom element
-        const GitHubDashboardElement = Vue.defineCustomElement(GitHubDashboardComponent);
-
-        // Register the custom element
-        customElements.define('github-dashboard', GitHubDashboardElement);
-
-        // Setup cleanup on page unload
-        window.addEventListener('beforeunload', () => {
-            resourceManager.cleanup();
-        });
-
-        console.log('GitHub Dashboard web component registered successfully');
+            draft: false,
+          },
+          {
+            number: 38,
+            title: 'Fix responsive design issues',
+            state: 'open',
+            created_at: new Date(Date.now() - 172800000).toISOString(),
+            updated_at: new Date(Date.now() - 7200000).toISOString(),
+            html_url: `https://github.com/${repoName}/pull/38`,
+            user: {
+              login: 'designer',
+              avatar_url: 'https://github.com/identicons/designer.png',
+            },
+            draft: true,
+          }
+        ];
+      };
     }
-})();
+  }
+
+  // DOM ready handler
+  function onDOMReady(callback) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', callback);
+    } else {
+      callback();
+    }
+  }
+
+  // Main entry point
+  function main() {
+    setupPluginAPI();
+
+    onDOMReady(async () => {
+      try {
+        await initialize();
+
+        // Auto-initialize any existing elements
+        const existingElements = document.querySelectorAll('github-dashboard');
+        if (existingElements.length > 0) {
+          console.log(`[GitHub Dashboard] Found ${existingElements.length} existing elements`);
+        }
+      } catch (error) {
+        console.error('[GitHub Dashboard] Failed to initialize:', error);
+      }
+    });
+  }
+
+  // Export for module systems
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { initialize, setupPluginAPI };
+  } else if (typeof define === 'function' && define.amd) {
+    define([], () => ({ initialize, setupPluginAPI }));
+  } else {
+    // Browser global
+    global.GitHubDashboard = { initialize, setupPluginAPI };
+  }
+
+  // Auto-initialize in browser environment
+  if (typeof window !== 'undefined') {
+    main();
+  }
+
+})(typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : this);
