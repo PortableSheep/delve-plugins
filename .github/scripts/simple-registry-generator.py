@@ -240,8 +240,8 @@ def main():
 
     print("✅ Registry generation complete!")
     print(f"   - registry.yml: {len(plugins)} plugins")
-    print(f"   - api/plugins.json: discovery endpoint")
-    print(f"   - api/plugins/*: individual plugin details")
+    print("   - api/plugins.json: discovery endpoint")
+    print("   - api/plugins/*: individual plugin details")
 
 if __name__ == '__main__':
     main()
